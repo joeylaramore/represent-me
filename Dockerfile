@@ -1,5 +1,7 @@
 FROM nginx:1.27-alpine
 COPY index.html styles.css app.js ballot.js /usr/share/nginx/html/
+COPY evidence.js /usr/share/nginx/html/evidence.js
+COPY data/candidate-evidence-2026.json /usr/share/nginx/html/data/candidate-evidence-2026.json
 COPY data/ /usr/share/nginx/html/data/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
