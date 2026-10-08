@@ -37,3 +37,13 @@
 .ballot-row h4{font:700 21px Georgia,serif;margin:5px 0}.ballot-row small{font:11px monospace;color:var(--muted);text-transform:uppercase}
 .ballot-candidates{display:grid;grid-template-columns:1fr 1fr;gap:14px}.ballot-candidates strong,.ballot-candidates span{display:block}.ballot-candidates span{font-size:12px;color:var(--muted)}.ballot-row>a{font-size:12px;white-space:nowrap}
 @media(max-width:760px){.ballot-row{grid-template-columns:1fr;gap:12px}.ballot-candidates{grid-template-columns:1fr 1fr}.ballot-row>a{justify-self:start}}
+
+/* Private print-only voting-day reference */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.print-ballot-controls{padding:20px 22px;margin:20px 0;background:#eef5ec;border:1px solid var(--line)}
+.print-ballot-controls p{font-size:14px;line-height:1.6}.print-ballot-controls button{margin:8px 12px 8px 0}
+.ballot-candidates{border:0;padding:0;margin:0}.ballot-option{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:14px}.ballot-option input{margin-top:5px;accent-color:#24513b}.ballot-option small{display:block;color:var(--muted)}
+#private-print-sheet{display:none}
+@media print{body>*:not(#private-print-sheet){display:none!important}#private-print-sheet{display:block!important;position:static!important;color:#000;background:#fff;font:12pt Georgia,serif;margin:0}#private-print-sheet h1{font-size:20pt;margin-bottom:10pt}#private-print-sheet p{break-inside:avoid;border-bottom:1px solid #ddd;padding:6pt 0;margin:0} @page{margin:0.65in}}
+
+.vote-privacy-notice{background:#fff;border:2px solid #24513b;border-radius:8px;padding:16px 18px;margin:0 0 18px}.vote-privacy-notice>strong{display:block;font-size:18px;color:#24513b}.vote-privacy-notice p{margin:8px 0 0}
