@@ -27,3 +27,13 @@
 .vote-plan-links a{color:var(--green);font-weight:700;font-size:14px}
 .verified-tag{font:11px monospace;color:var(--green);background:var(--mint);padding:8px 10px;border-radius:18px}
 @media(max-width:760px){.vote-plan-grid{grid-template-columns:1fr}#vote-plan{padding-top:26px}.verified-tag{display:none}}
+
+/* Evidence-labeled preliminary ballot */
+.ballot-warning{background:#fff9e8;border-left:4px solid var(--yellow);padding:17px 20px;margin:0 0 25px;color:var(--ink);font-size:14px}
+.ballot-warning a,.ballot-row a{color:var(--green)}
+.ballot-group{margin:30px 0}.ballot-group h3{font-size:27px;margin:0 0 15px}
+.ballot-list{border-top:1px solid var(--line)}
+.ballot-row{display:grid;grid-template-columns:1.1fr 1.6fr auto;gap:20px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+.ballot-row h4{font:700 21px Georgia,serif;margin:5px 0}.ballot-row small{font:11px monospace;color:var(--muted);text-transform:uppercase}
+.ballot-candidates{display:grid;grid-template-columns:1fr 1fr;gap:14px}.ballot-candidates strong,.ballot-candidates span{display:block}.ballot-candidates span{font-size:12px;color:var(--muted)}.ballot-row>a{font-size:12px;white-space:nowrap}
+@media(max-width:760px){.ballot-row{grid-template-columns:1fr;gap:12px}.ballot-candidates{grid-template-columns:1fr 1fr}.ballot-row>a{justify-self:start}}
