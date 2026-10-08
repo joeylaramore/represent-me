@@ -10,12 +10,13 @@ Completed:
 - Explicit verified/pending/unclear evidence language and authoritative source links.
 - Local-only initial beliefs questionnaire with progressive disclosure.
 - Docker Compose, Nginx, health check, and localhost-only port binding (`8091`).
+- GitHub Actions deployment is live at `/home/joey/represent-me`; the container is healthy on `127.0.0.1:8091`.
 - Smoke tests for election labeling, source attribution, and avoiding fabricated candidate names.
 - GitHub Actions deployment workflow patterned for Docker-over-SSH deployment.
 
 Outstanding:
 
 - Official sample ballot and candidate filings have not yet been imported or verified.
-- Candidate comparison data model/pages, persistent storage, authentication, privacy review, CI/CD secrets, server access, DNS, HTTPS, and external deployment remain outstanding.
+- Candidate comparison data model/pages, persistent storage, authentication, privacy review, DNS, HTTPS, and public-domain routing remain outstanding.
 
-Next safe steps: obtain official sources, add a structured election-data fixture and verification tests, then configure the repository secrets documented in `docs/DEPLOYMENT.md`.
+Next safe steps: obtain official sources, add a structured election-data fixture and verification tests, then configure Nginx/DNS/TLS for `representme.jlaramore.com` after checking the existing server configuration.
