@@ -27,3 +27,5 @@
 .vote-plan-links a{color:var(--green);font-weight:700;font-size:14px}
 .verified-tag{font:11px monospace;color:var(--green);background:var(--mint);padding:8px 10px;border-radius:18px}
 @media(max-width:760px){.vote-plan-grid{grid-template-columns:1fr}#vote-plan{padding-top:26px}.verified-tag{display:none}}
+
+.candidate-source{font-size:12px!important;color:var(--muted)}.candidate-source a{color:var(--green);font-weight:700}.grid article p strong{color:var(--ink)}
