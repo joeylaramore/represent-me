@@ -36,4 +36,4 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -eu; test -d '$DEPLOY_PATH/.git'; git -C '$DEPLOY_PATH' fetch origin main; git -C '$DEPLOY_PATH' checkout -q main; git -C '$DEPLOY_PATH' pull --ff-only origin main; cd '$DEPLOY_PATH'; docker compose up -d --build --remove-orphans; docker compose ps"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -eu; if [ ! -d '$DEPLOY_PATH/.git' ]; then mkdir -p \"\$(dirname '$DEPLOY_PATH')\"; git clone --branch main --single-branch https://github.com/joeylaramore/represent-me.git '$DEPLOY_PATH'; else git -C '$DEPLOY_PATH' fetch origin main; git -C '$DEPLOY_PATH' checkout -q main; git -C '$DEPLOY_PATH' pull --ff-only origin main; fi; cd '$DEPLOY_PATH'; docker compose up -d --build --remove-orphans; docker compose ps"
