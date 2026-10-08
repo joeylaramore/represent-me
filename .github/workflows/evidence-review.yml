@@ -1,0 +1,27 @@
+name: Evidence review
+on:
+  pull_request:
+    paths:
+      - 'data/candidate-evidence-2026.json'
+      - 'data/ballot-2026.json'
+      - 'scripts/validate-evidence.mjs'
+      - 'package.json'
+      - '.github/workflows/evidence-review.yml'
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run validate:evidence
+      - run: npm test
+      - name: Report research backlog
+        run: |
+          node -e "const r=require('./data/ballot-2026.json');const e=require('./data/candidate-evidence-2026.json');const total=r.contests.reduce((n,c)=>n+c.candidates.length,0);const covered=e.candidates.filter(c=>c.claims&&c.claims.length).length;console.log('Candidate evidence coverage: '+covered+'/'+total+' (preliminary roster; verify before research)')"
