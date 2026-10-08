@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "test": "node --test",
-    "validate:evidence": "node scripts/validate-evidence.mjs"
+    "validate:evidence": "node scripts/validate-evidence.mjs",
+    "import:evidence": "node scripts/import-evidence.mjs",
+    "validate:imports": "node scripts/validate-import-inbox.mjs"
   }
 }

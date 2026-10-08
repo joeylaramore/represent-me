@@ -1,0 +1,34 @@
+name: Import official votes and candidate position sources
+on:
+  schedule:
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: npm run validate:evidence
+      - run: npm run validate:imports
+      - run: npm run import:evidence
+        env:
+          CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
+      - run: npm test && npm run validate:evidence && npm run validate:imports
+      - name: Open review PR for new source material
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automated/daily-evidence-import
+          delete-branch: true
+          title: 'Refresh official votes and candidate position sources'
+          commit-message: 'Refresh daily evidence import inbox'
+          body: |
+            Daily automated import of official Congressional roll-call data and configured first-party candidate position sources.
+
+            This updates only the research inbox. It does not publish candidate claims or change public comparison data. Review identity, vote context, source wording, and citations before moving any claim into `data/candidate-evidence-2026.json`.

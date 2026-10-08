@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "election": "2026-11-03",
+  "note": "Automation staging only. Vote rows are official records; position pages are source snapshots. Review identity, context, wording, and citations before adding claims to candidate-evidence-2026.json.",
+  "votes": [],
+  "positionSources": []
+}
