@@ -1,0 +1,263 @@
+{
+  "election": "2026-11-03",
+  "updated": "2026-10-08",
+  "status": "preliminary-not-personalized",
+  "sources": [
+    {
+      "label": "Georgia Secretary of State election hub",
+      "url": "https://sos.ga.gov/november-3-2026-general-election"
+    },
+    {
+      "label": "Coweta County elections",
+      "url": "https://www.coweta.ga.us/164/Elections-Voter-Registration"
+    },
+    {
+      "label": "Candidate roster and statewide offices (secondary)",
+      "url": "https://theballotbrief.com/zip/30276"
+    },
+    {
+      "label": "Coweta candidate listings (secondary)",
+      "url": "https://theballotbrief.com/state/georgia/coweta-county"
+    }
+  ],
+  "contests": [
+    {
+      "scope": "Federal",
+      "office": "U.S. Senate",
+      "candidates": [
+        {
+          "name": "Jon Ossoff",
+          "party": "Democratic"
+        },
+        {
+          "name": "Mike Collins",
+          "party": "Republican"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Federal",
+      "office": "U.S. House · District 3",
+      "candidates": [
+        {
+          "name": "Brian Jack",
+          "party": "Republican"
+        },
+        {
+          "name": "Maura Keller",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Governor",
+      "candidates": [
+        {
+          "name": "Rick Jackson",
+          "party": "Republican"
+        },
+        {
+          "name": "Keisha Lance Bottoms",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Lieutenant Governor",
+      "candidates": [
+        {
+          "name": "Greg Dolezal",
+          "party": "Republican"
+        },
+        {
+          "name": "Josh McLaurin",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Attorney General",
+      "candidates": [
+        {
+          "name": "Brian Strickland",
+          "party": "Republican"
+        },
+        {
+          "name": "Tanya Miller",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Secretary of State",
+      "candidates": [
+        {
+          "name": "Tim Fleming",
+          "party": "Republican"
+        },
+        {
+          "name": "Penny Brown Reynolds",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Agriculture Commissioner",
+      "candidates": [
+        {
+          "name": "Tyler Harper",
+          "party": "Republican"
+        },
+        {
+          "name": "Katherine E. Juhan-Arnold",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Insurance Commissioner",
+      "candidates": [
+        {
+          "name": "John King",
+          "party": "Republican"
+        },
+        {
+          "name": "Keisha Sean Waites",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Labor Commissioner",
+      "candidates": [
+        {
+          "name": "Barbara Rivera Holmes",
+          "party": "Republican"
+        },
+        {
+          "name": "Nikki Porcher",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "State School Superintendent",
+      "candidates": [
+        {
+          "name": "Richard Woods",
+          "party": "Republican"
+        },
+        {
+          "name": "Lydia Powell",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Public Service Commissioner · District 3",
+      "candidates": [
+        {
+          "name": "Fitz Johnson",
+          "party": "Republican"
+        },
+        {
+          "name": "Peter Hubbard",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "Statewide",
+      "office": "Public Service Commissioner · District 5",
+      "candidates": [
+        {
+          "name": "Josh Tolbert",
+          "party": "Republican"
+        },
+        {
+          "name": "Shelia Edwards",
+          "party": "Democratic"
+        }
+      ],
+      "source": 2,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "District-dependent",
+      "office": "Georgia House · District 70",
+      "candidates": [
+        {
+          "name": "Melissa Stuckey",
+          "party": "Republican"
+        },
+        {
+          "name": "Pierre Whatley",
+          "party": "Democratic"
+        }
+      ],
+      "source": 3,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    },
+    {
+      "scope": "District-dependent",
+      "office": "Coweta County Commission · District 2",
+      "candidates": [
+        {
+          "name": "Bill McKenzie",
+          "party": "Republican"
+        },
+        {
+          "name": "Amiee Tybor",
+          "party": "Democratic"
+        }
+      ],
+      "source": 3,
+      "verification": "reported-roster",
+      "personalBallotConfirmed": false
+    }
+  ]
+}
