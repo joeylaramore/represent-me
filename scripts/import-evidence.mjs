@@ -7,7 +7,7 @@ const targetsPath=new URL('data/import-targets.json',root);
 const inboxPath=new URL('data/imported-evidence-2026.json',root);
 const apiRoot='https://api.congress.gov/v3';
 const senateRoot='https://www.senate.gov/legislative/LIS/roll_call_lists';
-const headers={'user-agent':'RepresentMe evidence import/1.0 (+https://representme.jlaramore.com/)','accept':'application/json,text/xml,text/html'};
+const headers={'user-agent':'RepresentMe evidence import/1.0 (+https://representme.jlaramore.com/)','referer':'https://www.senate.gov/legislative/votes_new.htm','accept':'application/json,text/xml,text/html'};
 
 function textOf(xml,tag){const match=xml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'));return match?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim()||''}
 function parseSenateVoteXml(xml,{congress,session,number,url}){
@@ -29,7 +29,7 @@ function extractHouseEntries(payload){
 function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
 function currentCongress(date=new Date()){const year=date.getUTCFullYear();return {congress:Math.floor((year-1789)/2)+1,session:year%2?1:2}}
-async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(!response.ok)throw new Error(`${response.status} ${response.statusText} for ${safe}`);return response}
+export async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;for(let attempt=0;attempt<4;attempt++){try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(response.ok)return response;if(![403,429,500,502,503,504].includes(response.status)||attempt===3)throw new Error(`${response.status} ${response.statusText} for ${safe}`);await new Promise(resolve=>setTimeout(resolve,1000*(2**attempt)));}throw new Error(`Request failed for ${safe}`)}
 async function fetchJson(url){return request(url).then(r=>r.json())}
 async function fetchText(url){return request(url).then(r=>r.text())}
 function authorizedUrl(path,key){const url=new URL(`${apiRoot}${path}`);url.searchParams.set('api_key',key);url.searchParams.set('format','json');return url}

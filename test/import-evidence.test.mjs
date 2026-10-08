@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport} from '../scripts/import-evidence.mjs';
+import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport,request} from '../scripts/import-evidence.mjs';
 
 test('Senate vote records retain the official roll call, date, question, source, and member vote',()=>{
  const xml=`<roll_call_vote><congress>119</congress><session>2</session><vote_number>42</vote_number><vote_date>June 3, 2026, 2:01 PM</vote_date><vote_question_text><![CDATA[On Passage of the Bill]]></vote_question_text><vote_result_text>Bill Passed (51-49)</vote_result_text><members><member><last_name>Ossoff</last_name><state>GA</state><vote_cast>Nay</vote_cast></member></members></roll_call_vote>`;
@@ -36,3 +36,5 @@ test('configured import positions are HTTPS first-party source pages',()=>{
 test('daily importer fails clearly when the Congress.gov credential is absent',async()=>{
  await assert.rejects(runImport({apiKey:''}),/Set CONGRESS_API_KEY/);
 });
+
+test('transient Senate access denial is retried before failing the import',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;return calls===1?new Response('denied',{status:403,statusText:'Forbidden'}):new Response('<votes/>',{status:200})};try{const response=await request('https://www.senate.gov/example.xml');assert.equal(response.status,200);assert.equal(calls,2)}finally{globalThis.fetch=original}});
