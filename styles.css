@@ -45,3 +45,5 @@
 .ballot-candidates{border:0;padding:0;margin:0}.ballot-option{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:14px}.ballot-option input{margin-top:5px;accent-color:#24513b}.ballot-option small{display:block;color:var(--muted)}
 #private-print-sheet{display:none}
 @media print{body>*:not(#private-print-sheet){display:none!important}#private-print-sheet{display:block!important;position:static!important;color:#000;background:#fff;font:12pt Georgia,serif;margin:0}#private-print-sheet h1{font-size:20pt;margin-bottom:10pt}#private-print-sheet p{break-inside:avoid;border-bottom:1px solid #ddd;padding:6pt 0;margin:0} @page{margin:0.65in}}
+
+.vote-privacy-notice{background:#fff;border:2px solid #24513b;border-radius:8px;padding:16px 18px;margin:0 0 18px}.vote-privacy-notice>strong{display:block;font-size:18px;color:#24513b}.vote-privacy-notice p{margin:8px 0 0}
