@@ -14,6 +14,7 @@ for(const [i,c] of (evidence.candidates||[]).entries()){
   if(!validTypes.has(claim.type))errors.push(at+': invalid claim type');
   if(typeof claim.topic!=='string'||!claim.topic.trim())errors.push(at+': topic required');
   if(typeof claim.summary!=='string'||claim.summary.trim().length<20)errors.push(at+': neutral summary required (20+ characters)');
+  if(claim.alignment!==undefined&&!['supports','conflicts','mixed'].includes(claim.alignment))errors.push(at+': alignment must be supports, conflicts, or mixed');
   if(!/^\d{4}-\d{2}-\d{2}$/.test(claim.date||'')||Number.isNaN(Date.parse(claim.date)))errors.push(at+': valid YYYY-MM-DD date required');
   if(!Array.isArray(claim.sources)||claim.sources.length===0)errors.push(at+': at least one original source required');
   const domains=new Set();
