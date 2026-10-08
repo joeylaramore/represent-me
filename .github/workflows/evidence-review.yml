@@ -4,7 +4,13 @@ on:
     paths:
       - 'data/candidate-evidence-2026.json'
       - 'data/ballot-2026.json'
+      - 'data/import-targets.json'
+      - 'data/imported-evidence-2026.json'
       - 'scripts/validate-evidence.mjs'
+      - 'scripts/import-evidence.mjs'
+      - 'scripts/validate-import-inbox.mjs'
+      - 'test/import-evidence.test.mjs'
+      - '.github/workflows/import-evidence.yml'
       - 'package.json'
       - '.github/workflows/evidence-review.yml'
   schedule:
@@ -21,6 +27,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm run validate:evidence
+      - run: npm run validate:imports
       - run: npm test
       - name: Report research backlog
         run: |

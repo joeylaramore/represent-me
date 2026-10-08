@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "election": "2026-11-03",
+  "candidates": [
+    {
+      "name": "Jon Ossoff",
+      "office": "U.S. Senate",
+      "chamber": "senate",
+      "senateName": "Ossoff",
+      "state": "GA",
+      "memberOffice": "U.S. Senate · Georgia",
+      "positionSources": ["https://electjon.com/"]
+    },
+    {
+      "name": "Mike Collins",
+      "office": "U.S. Senate",
+      "chamber": "house",
+      "bioguideId": "C001129",
+      "memberOffice": "U.S. House · Georgia District 10",
+      "positionSources": ["https://mikecollinsga.com/issues/"]
+    },
+    {
+      "name": "Brian Jack",
+      "office": "U.S. House · District 3",
+      "chamber": "house",
+      "bioguideId": "J000311",
+      "memberOffice": "U.S. House · Georgia District 3",
+      "positionSources": ["https://brianjack.com/issues/"]
+    }
+  ]
+}

@@ -12,7 +12,7 @@
 4. **Corroborate** material contextual assertions with a second *independent* reputable source when available (e.g., AP, local public-interest reporting, official fiscal analysis). Two outlets repeating one press release are not independent evidence. A government roll call alone can establish how someone voted; corroboration is for interpretation/context.
 5. **Write a neutral, short summary**, tag claim type and topic, include the date and source titles/publishers/HTTPS URLs. Record uncertainty or changes in position as separate dated entries. Never rank candidates or editorialize.
 6. **Run** `npm test` and `npm run validate:evidence`. Have a reviewer open every citation, verify claim-to-source fit and candidate identity, and approve the PR. Merge only reviewed, supported claims.
-7. **Refresh** on a weekly review cadence through Election Day and when candidates publish new statements, legislative votes are recorded, or official candidate lists change. Re-review stale and disputed claims; update dates rather than silently replacing historical positions.
+7. **Refresh** from the daily research inbox in `data/imported-evidence-2026.json` and when candidates publish new statements, legislative votes are recorded, or official candidate lists change. Re-review stale and disputed claims; update dates rather than silently replacing historical positions. The daily job does not publish claims: review source changes and draft any public claim separately.
 
 ## Minimal JSON example (illustrative only; do NOT publish fictional claims)
 ```json
