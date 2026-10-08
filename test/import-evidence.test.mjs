@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,mergeRows,currentCongress,runImport} from '../scripts/import-evidence.mjs';
+import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport} from '../scripts/import-evidence.mjs';
 
 test('Senate vote records retain the official roll call, date, question, source, and member vote',()=>{
  const xml=`<roll_call_vote><congress>119</congress><session>2</session><vote_number>42</vote_number><vote_date>June 3, 2026, 2:01 PM</vote_date><vote_question_text><![CDATA[On Passage of the Bill]]></vote_question_text><vote_result_text>Bill Passed (51-49)</vote_result_text><members><member><last_name>Ossoff</last_name><state>GA</state><vote_cast>Nay</vote_cast></member></members></roll_call_vote>`;
@@ -26,6 +26,7 @@ test('current Congress and session calculation follows the two-year congressiona
 });
 
 test('XML helper trims markup and decodes the common source entities',()=>assert.equal(textOf('<title>Costs &amp; care</title>','title'),'Costs & care'));
+test('Senate roll call index yields unique numeric vote identifiers',()=>assert.deepEqual(extractSenateVoteNumbers('<votes><vote_number>0012</vote_number><vote_number>0012</vote_number><vote_number>13</vote_number></votes>'),[12,13]));
 
 test('configured import positions are HTTPS first-party source pages',()=>{
  const targets=JSON.parse(fs.readFileSync('data/import-targets.json','utf8'));

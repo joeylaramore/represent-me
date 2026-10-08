@@ -26,16 +26,17 @@ function extractHouseEntries(payload){
  const rows=root?.results?.item||root?.houseRollCallVoteMemberVotes?.results?.item||[];
  return (Array.isArray(rows)?rows:[rows]).filter(Boolean);
 }
+function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
 function currentCongress(date=new Date()){const year=date.getUTCFullYear();return {congress:Math.floor((year-1789)/2)+1,session:year%2?1:2}}
-async function request(url,options={}){const response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)});if(!response.ok){const safe=new URL(url);safe.searchParams.delete('api_key');throw new Error(`${response.status} ${response.statusText} for ${safe}`)}return response}
+async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(!response.ok)throw new Error(`${response.status} ${response.statusText} for ${safe}`);return response}
 async function fetchJson(url){return request(url).then(r=>r.json())}
 async function fetchText(url){return request(url).then(r=>r.text())}
 function authorizedUrl(path,key){const url=new URL(`${apiRoot}${path}`);url.searchParams.set('api_key',key);url.searchParams.set('format','json');return url}
 async function fetchHouseVotes(targets,existing,key,congress,session){
  const ids=new Set(targets.filter(c=>c.chamber==='house').map(c=>c.bioguideId));
  const old=new Set(existing.map(v=>v.id));const newRows=[];let offset=0,total=Infinity;
- while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const root=page.houseRollCallVotes||{};const votes=root.houseRollCallVote||[];const items=Array.isArray(votes)?votes:[votes];total=Number(root.pagination?.count??items.length);if(!items.length)break;
+ while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const root=page.houseRollCallVotes||{};const votes=root.houseRollCallVote||[];const items=Array.isArray(votes)?votes:[votes];total=Number(page.pagination?.count??root.pagination?.count??items.length);if(!items.length)break;
   for(const vote of items){const voteId=String(vote.identifier||`${congress}-${session}-${vote.rollCallNumber}`);if([...ids].every(memberId=>old.has(`house-${voteId}-${memberId}`)))continue;const base=`/house-vote/${congress}/${session}/${vote.rollCallNumber}`;const detail=await fetchJson(authorizedUrl(base,key));const memberData=await fetchJson(authorizedUrl(`${base}/members`,key));
    const full=detail.houseRollCallVote||detail;const rows=extractHouseEntries(memberData);for(const row of rows){const id=row.bioguideId||row.bioguideID;if(!ids.has(id)||old.has(`house-${voteId}-${id}`))continue;const target=targets.find(c=>c.bioguideId===id);newRows.push({id:`house-${voteId}-${id}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:id,chamber:'house',date:full.startDate||vote.startDate||'',question:full.voteQuestion||vote.voteQuestion||'',result:full.result||vote.result||'',vote:row.voteCast||row.vote||'',billUrl:full.legislationUrl||vote.legislationUrl||'',sourceUrl:`https://api.congress.gov/v3/house-vote/${congress}/${session}/${vote.rollCallNumber}`,status:'official-record-needs-context-review'});}
   }
@@ -45,17 +46,16 @@ async function fetchHouseVotes(targets,existing,key,congress,session){
 }
 async function fetchSenateVotes(targets,existing,congress,session){
  const senators=targets.filter(c=>c.chamber==='senate'&&c.senateName);const old=new Set(existing.map(v=>v.id));const indexUrl=`${senateRoot}/vote_menu_${congress}_${session}.xml`;const xml=await fetchText(indexUrl);
- const numbers=[...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1]));
- const unique=[...new Set(numbers)].filter(Number.isFinite);const result=[];
+ const unique=extractSenateVoteNumbers(xml);const result=[];
  for(const number of unique){const id=`senate-${congress}-${session}-${String(number).padStart(5,'0')}`;if(senators.every(c=>old.has(`${id}-${c.name}`)))continue;const url=`https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(number).padStart(5,'0')}.xml`;const vote=parseSenateVoteXml(await fetchText(url),{congress,session,number,url});for(const target of senators){const member=vote.members.find(m=>m.lastName.toLowerCase()===target.senateName.toLowerCase()&&m.state===target.state);if(member)result.push({id:`${vote.id}-${target.name}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:`${target.senateName}-${target.state}`,chamber:'senate',date:vote.date,question:vote.question,result:vote.result,vote:member.vote,sourceUrl:url,status:'official-record-needs-context-review'});}}
  return result;
 }
 async function fetchPositions(targets,existing){
  const old=new Map(existing.map(x=>[x.candidate+'|'+x.url,x]));const rows=[];
- for(const candidate of targets)for(const url of candidate.positionSources||[]){const html=await fetchText(url);const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
+ for(const candidate of targets)for(const url of candidate.positionSources||[]){const response=await request(url);const final=new URL(response.url);const original=new URL(url);if(final.protocol!=='https:'||final.hostname.replace(/^www\./,'')!==original.hostname.replace(/^www\./,''))throw new Error(`Position source redirected outside its first-party host: ${url}`);const html=await response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
  return rows;
 }
-export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,mergeRows,currentCongress};
+export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress};
 export async function runImport({targetsPathArg=targetsPath,inboxPathArg=inboxPath,apiKey=process.env.CONGRESS_API_KEY,now=new Date()}={}){
  if(!apiKey)throw new Error('Set CONGRESS_API_KEY to use the official Congress.gov House vote API.');
  const targets=JSON.parse(await fs.readFile(targetsPathArg,'utf8'));const inbox=JSON.parse(await fs.readFile(inboxPathArg,'utf8'));const {congress,session}=currentCongress(now);const votes=[];

@@ -4,7 +4,7 @@ The scheduled importer refreshes `data/imported-evidence-2026.json`, a research-
 
 ## Sources and matching
 
-- House roll-call records come from the official Congress.gov API and are joined to configured members by Bioguide ID.
+- House roll-call records come from the official Congress.gov API and are joined to configured members by Bioguide ID. The API’s House-vote collection is currently beta and its published coverage excludes some non-legislation votes; see the [official endpoint coverage notes](https://github.com/LibraryOfCongress/api.congress.gov/blob/main/Documentation/HouseRollCallVoteEndpoint.md).
 - Senate roll-call records come from the official Senate XML feeds and are joined by the configured member surname and state.
 - Candidate position sources are explicitly listed in `data/import-targets.json`. The importer stores page title, description, canonical URL, and a content hash; it does not copy entire pages or turn language into claims.
 - Initial targets cover Jon Ossoff, Mike Collins, and Brian Jack. Add a candidate only after confirming the identity and the first-party source URL. Add more official congressional IDs to capture more voting records.
