@@ -1,7 +1,7 @@
 // Evidence is editorially curated, cited, and never inferred from party or office.
 (async()=>{
  const root=document.getElementById('preliminary-ballot');if(!root)return;
- const escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;',"'":'&#39;'}[c]));
+ const escapeHtml=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
  let evidence=[];
  try{const res=await fetch('data/candidate-evidence-2026.json',{cache:'no-store'});if(!res.ok)throw Error('unavailable');const json=await res.json();evidence=Array.isArray(json.candidates)?json.candidates:[]}catch{evidence=[]}
  const render=(candidate)=>{
@@ -23,7 +23,7 @@
    const title=document.createElement('summary');title.textContent='Votes & positions — read the source text';panel.appendChild(title);
    const content=document.createElement('div');content.className='evidence-candidates';
    for(const name of names){const item=document.createElement('section');const heading=document.createElement('h5');heading.textContent=name;item.appendChild(heading);const match=evidence.find(c=>c.office===office&&c.name===name);const body=document.createElement('div');body.innerHTML=render(match);item.appendChild(body);content.appendChild(item)}
-   const foot=document.createElement('p');foot.className='evidence-disclaimer';foot.textContent='Evidence is dated and sourced. A recorded vote does not establish motive. Missing information is not a negative assessment. Candidate roster remains preliminary.';content.appendChild(foot);panel.appendChild(content);row.appendChild(panel);
+   const foot=document.createElement('p');foot.className='evidence-disclaimer';foot.textContent='Campaign statements are attributed to the campaign. Independent reporting or official records are linked to corroborate specific actions; corroboration does not establish motive, policy effectiveness, or the full campaign characterization. This is not an endorsement. A recorded vote does not establish motive. Missing information is not a negative assessment. Candidate roster remains preliminary.';content.appendChild(foot);panel.appendChild(content);row.appendChild(panel);
   });
  };
  new MutationObserver(()=>{if(root.querySelector('.ballot-row:not(:has(.candidate-evidence))'))enhance()}).observe(root,{childList:true,subtree:true});enhance();
