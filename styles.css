@@ -100,3 +100,18 @@
 .vote-more{margin:10px 0}
 .candidate-claims-heading{font:700 16px Arial,sans-serif;margin:20px 0 8px}
 @media(max-width:600px){.vote-controls{grid-template-columns:1fr}.official-votes{padding:10px}.vote-record a{display:inline-block;padding:6px 0}}
+
+/* Progressive evidence: compact claim previews reveal context and citations on demand. */
+.evidence-claim-list{display:grid;gap:6px}
+.evidence-claim{background:#fff;border:1px solid var(--line);border-radius:7px;padding:0 10px}
+.evidence-claim>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;padding:10px 2px}
+.evidence-claim>summary::-webkit-details-marker{display:none}
+.evidence-claim>summary:focus-visible,.evidence-sources>summary:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:3px}
+.evidence-claim .evidence-meta{grid-column:1/-1;display:block;margin:0;color:var(--green)}
+.evidence-preview{grid-column:1;min-width:0;color:var(--muted);font-size:12px;line-height:1.4}
+.evidence-expand-hint{grid-column:2;align-self:center;color:var(--green);font-size:11px;font-weight:700;text-align:right;white-space:nowrap}
+.evidence-detail{border-top:1px solid var(--line);padding:8px 2px 10px}
+.evidence-sources{margin-top:8px}
+.evidence-sources>summary{cursor:pointer;color:var(--green);font-size:12px;font-weight:700}
+.evidence-sources ul{margin:6px 0 0;padding-left:18px}
+@media(max-width:600px){.evidence-claim>summary{grid-template-columns:1fr;gap:5px}.evidence-preview,.evidence-expand-hint{grid-column:1}.evidence-expand-hint{text-align:left;white-space:normal}.evidence-candidates>section{padding:10px}}
