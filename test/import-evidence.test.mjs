@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport,request,fetchFirstPartyResponse} from '../scripts/import-evidence.mjs';
+import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,currentCongress,runImport,request,fetchFirstPartyResponse} from '../scripts/import-evidence.mjs';
 
 test('Senate vote records retain the official roll call, date, question, source, and member vote',()=>{
  const xml=`<roll_call_vote><congress>119</congress><session>2</session><vote_number>42</vote_number><vote_date>June 3, 2026, 2:01 PM</vote_date><vote_question_text><![CDATA[On Passage of the Bill]]></vote_question_text><vote_result_text>Bill Passed (51-49)</vote_result_text><members><member><last_name>Ossoff</last_name><state>GA</state><vote_cast>Nay</vote_cast></member></members></roll_call_vote>`;
@@ -59,4 +59,11 @@ test('position fetch follows same-host HTTPS redirects without sending a Senate 
   assert.deepEqual(requests.map(x=>new URL(x.url).pathname),['/','/issues/']);
   assert.ok(requests.every(x=>x.options.redirect==='manual'&&!('referer' in x.options.headers)));
  }finally{globalThis.fetch=original}
+});
+
+test('House vote list accepts Congress.gov top-level array response and nested response shapes',()=>{
+ const actual={houseRollCallVotes:[{identifier:'1192200001',rollCallNumber:1}],pagination:{count:314}};
+ const nested={houseRollCallVotes:{houseRollCallVote:[{identifier:'1192200002',rollCallNumber:2}]}};
+ assert.deepEqual(extractHouseVotes(actual),actual.houseRollCallVotes);
+ assert.deepEqual(extractHouseVotes(nested),nested.houseRollCallVotes.houseRollCallVote);
 });
