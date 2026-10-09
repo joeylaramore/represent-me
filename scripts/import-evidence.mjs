@@ -26,6 +26,11 @@ function extractHouseEntries(payload){
  const rows=root?.results?.item||root?.houseRollCallVoteMemberVotes?.results?.item||[];
  return (Array.isArray(rows)?rows:[rows]).filter(Boolean);
 }
+function extractHouseVotes(payload){
+ const collection=payload?.houseRollCallVotes;
+ const votes=Array.isArray(collection)?collection:collection?.houseRollCallVote||[];
+ return (Array.isArray(votes)?votes:[votes]).filter(Boolean);
+}
 function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
 function currentCongress(date=new Date()){const year=date.getUTCFullYear();return {congress:Math.floor((year-1789)/2)+1,session:year%2?1:2}}
@@ -51,8 +56,8 @@ export async function fetchFirstPartyResponse(url){
 function authorizedUrl(path,key){const url=new URL(`${apiRoot}${path}`);url.searchParams.set('api_key',key);url.searchParams.set('format','json');return url}
 async function fetchHouseVotes(targets,existing,key,congress,session){
  const ids=new Set(targets.filter(c=>c.chamber==='house').map(c=>c.bioguideId));
- const old=new Set(existing.map(v=>v.id));const newRows=[];const diagnostics={listedVotes:0,memberRows:0,targetMemberRows:0,responseKeys:[],paginationCount:null,voteCollectionKeys:[],voteEntryType:'missing'};let offset=0,total=Infinity;
- while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const root=page.houseRollCallVotes||{};const votes=root.houseRollCallVote||[];const items=Array.isArray(votes)?votes:[votes];if(offset===0){diagnostics.responseKeys=Object.keys(page).sort();diagnostics.paginationCount=page.pagination?.count??root.pagination?.count??null;diagnostics.voteCollectionKeys=Object.keys(root).sort();diagnostics.voteEntryType=Array.isArray(votes)?'array':typeof votes;}total=Number(page.pagination?.count??root.pagination?.count??items.length);if(!items.length)break;diagnostics.listedVotes+=items.length;
+ const old=new Set(existing.map(v=>v.id));const newRows=[];const diagnostics={listedVotes:0,memberRows:0,targetMemberRows:0,responseKeys:[],paginationCount:null,voteCollectionType:'missing'};let offset=0,total=Infinity;
+ while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const collection=page.houseRollCallVotes;const root=Array.isArray(collection)?{}:(collection||{});const items=extractHouseVotes(page);if(offset===0){diagnostics.responseKeys=Object.keys(page).sort();diagnostics.paginationCount=page.pagination?.count??root.pagination?.count??null;diagnostics.voteCollectionType=Array.isArray(collection)?'array':typeof collection;}total=Number(page.pagination?.count??root.pagination?.count??items.length);if(!items.length)break;diagnostics.listedVotes+=items.length;
   for(const vote of items){const voteId=String(vote.identifier||`${congress}-${session}-${vote.rollCallNumber}`);if([...ids].every(memberId=>old.has(`house-${voteId}-${memberId}`)))continue;const base=`/house-vote/${congress}/${session}/${vote.rollCallNumber}`;const detail=await fetchJson(authorizedUrl(base,key));const memberData=await fetchJson(authorizedUrl(`${base}/members`,key));
    const full=detail.houseRollCallVote||detail;const rows=extractHouseEntries(memberData);diagnostics.memberRows+=rows.length;for(const row of rows){const id=row.bioguideId||row.bioguideID;if(!ids.has(id))continue;diagnostics.targetMemberRows++;if(old.has(`house-${voteId}-${id}`))continue;const target=targets.find(c=>c.bioguideId===id);newRows.push({id:`house-${voteId}-${id}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:id,chamber:'house',date:full.startDate||vote.startDate||'',question:full.voteQuestion||vote.voteQuestion||'',result:full.result||vote.result||'',vote:row.voteCast||row.vote||'',billUrl:full.legislationUrl||vote.legislationUrl||'',sourceUrl:`https://api.congress.gov/v3/house-vote/${congress}/${session}/${vote.rollCallNumber}`,status:'official-record-needs-context-review'});}
   }
@@ -71,7 +76,7 @@ async function fetchPositions(targets,existing){
  for(const candidate of targets)for(const url of candidate.positionSources||[]){const fetched=await fetchFirstPartyResponse(url);if(fetched.redirected){console.warn(`Skipping position source redirect outside its first-party host for ${candidate.name}: ${new URL(url).hostname} -> ${fetched.targetHost}`);continue;}const html=await fetched.response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
  return rows;
 }
-export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress};
+export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,currentCongress};
 export async function runImport({targetsPathArg=targetsPath,inboxPathArg=inboxPath,apiKey=process.env.CONGRESS_API_KEY,now=new Date()}={}){
  if(!apiKey)throw new Error('Set CONGRESS_API_KEY to use the official Congress.gov House vote API.');
  const targets=JSON.parse(await fs.readFile(targetsPathArg,'utf8'));const inbox=JSON.parse(await fs.readFile(inboxPathArg,'utf8'));const {congress,session}=currentCongress(now);const votes=[];
