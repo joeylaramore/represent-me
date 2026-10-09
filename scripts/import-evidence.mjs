@@ -29,14 +29,30 @@ function extractHouseEntries(payload){
 function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
 function currentCongress(date=new Date()){const year=date.getUTCFullYear();return {congress:Math.floor((year-1789)/2)+1,session:year%2?1:2}}
-export async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;for(let attempt=0;attempt<4;attempt++){try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(response.ok)return response;if(![403,429,500,502,503,504].includes(response.status)||attempt===3)throw new Error(`${response.status} ${response.statusText} for ${safe}`);await new Promise(resolve=>setTimeout(resolve,1000*(2**attempt)));}throw new Error(`Request failed for ${safe}`)}
+export async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;for(let attempt=0;attempt<4;attempt++){try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(response.ok||(options.redirect==='manual'&&response.status>=300&&response.status<400))return response;if(![403,429,500,502,503,504].includes(response.status)||attempt===3)throw new Error(`${response.status} ${response.statusText} for ${safe}`);await new Promise(resolve=>setTimeout(resolve,1000*(2**attempt)));}throw new Error(`Request failed for ${safe}`)}
 async function fetchJson(url){return request(url).then(r=>r.json())}
 async function fetchText(url){return request(url).then(r=>r.text())}
+export async function fetchFirstPartyResponse(url){
+ const original=new URL(url);let current=original;
+ const sourceHeaders={'user-agent':headers['user-agent'],'accept':headers.accept};
+ for(let attempt=0;attempt<5;attempt++){
+  const response=await request(current.href,{redirect:'manual',headers:sourceHeaders});
+  if(response.status>=300&&response.status<400){
+   const location=response.headers.get('location');if(!location)throw new Error(`Position source redirect has no Location header: ${original.hostname}`);
+   const next=new URL(location,current);
+   const sameHost=next.hostname.replace(/^www\./,'')===original.hostname.replace(/^www\./,'');
+   if(next.protocol!=='https:'||!sameHost)return {response:null,redirected:true,targetHost:next.hostname};
+   current=next;continue;
+  }
+  return {response,redirected:false,targetHost:current.hostname};
+ }
+ throw new Error(`Position source exceeded same-host redirect limit: ${original.hostname}`);
+}
 function authorizedUrl(path,key){const url=new URL(`${apiRoot}${path}`);url.searchParams.set('api_key',key);url.searchParams.set('format','json');return url}
 async function fetchHouseVotes(targets,existing,key,congress,session){
  const ids=new Set(targets.filter(c=>c.chamber==='house').map(c=>c.bioguideId));
- const old=new Set(existing.map(v=>v.id));const newRows=[];const diagnostics={listedVotes:0,memberRows:0,targetMemberRows:0};let offset=0,total=Infinity;
- while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const root=page.houseRollCallVotes||{};const votes=root.houseRollCallVote||[];const items=Array.isArray(votes)?votes:[votes];total=Number(page.pagination?.count??root.pagination?.count??items.length);if(!items.length)break;diagnostics.listedVotes+=items.length;
+ const old=new Set(existing.map(v=>v.id));const newRows=[];const diagnostics={listedVotes:0,memberRows:0,targetMemberRows:0,responseKeys:[],paginationCount:null,voteCollectionKeys:[],voteEntryType:'missing'};let offset=0,total=Infinity;
+ while(offset<total){const url=authorizedUrl(`/house-vote/${congress}/${session}`,key);url.searchParams.set('limit','250');url.searchParams.set('offset',String(offset));const page=await fetchJson(url);const root=page.houseRollCallVotes||{};const votes=root.houseRollCallVote||[];const items=Array.isArray(votes)?votes:[votes];if(offset===0){diagnostics.responseKeys=Object.keys(page).sort();diagnostics.paginationCount=page.pagination?.count??root.pagination?.count??null;diagnostics.voteCollectionKeys=Object.keys(root).sort();diagnostics.voteEntryType=Array.isArray(votes)?'array':typeof votes;}total=Number(page.pagination?.count??root.pagination?.count??items.length);if(!items.length)break;diagnostics.listedVotes+=items.length;
   for(const vote of items){const voteId=String(vote.identifier||`${congress}-${session}-${vote.rollCallNumber}`);if([...ids].every(memberId=>old.has(`house-${voteId}-${memberId}`)))continue;const base=`/house-vote/${congress}/${session}/${vote.rollCallNumber}`;const detail=await fetchJson(authorizedUrl(base,key));const memberData=await fetchJson(authorizedUrl(`${base}/members`,key));
    const full=detail.houseRollCallVote||detail;const rows=extractHouseEntries(memberData);diagnostics.memberRows+=rows.length;for(const row of rows){const id=row.bioguideId||row.bioguideID;if(!ids.has(id))continue;diagnostics.targetMemberRows++;if(old.has(`house-${voteId}-${id}`))continue;const target=targets.find(c=>c.bioguideId===id);newRows.push({id:`house-${voteId}-${id}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:id,chamber:'house',date:full.startDate||vote.startDate||'',question:full.voteQuestion||vote.voteQuestion||'',result:full.result||vote.result||'',vote:row.voteCast||row.vote||'',billUrl:full.legislationUrl||vote.legislationUrl||'',sourceUrl:`https://api.congress.gov/v3/house-vote/${congress}/${session}/${vote.rollCallNumber}`,status:'official-record-needs-context-review'});}
   }
@@ -52,7 +68,7 @@ async function fetchSenateVotes(targets,existing,congress,session){
 }
 async function fetchPositions(targets,existing){
  const old=new Map(existing.map(x=>[x.candidate+'|'+x.url,x]));const rows=[];
- for(const candidate of targets)for(const url of candidate.positionSources||[]){const response=await request(url);const final=new URL(response.url);const original=new URL(url);if(final.protocol!=='https:'||final.hostname.replace(/^www\./,'')!==original.hostname.replace(/^www\./,''))throw new Error(`Position source redirected outside its first-party host: ${url}`);const html=await response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
+ for(const candidate of targets)for(const url of candidate.positionSources||[]){const fetched=await fetchFirstPartyResponse(url);if(fetched.redirected){console.warn(`Skipping position source redirect outside its first-party host for ${candidate.name}: ${new URL(url).hostname} -> ${fetched.targetHost}`);continue;}const html=await fetched.response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
  return rows;
 }
 export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress};
