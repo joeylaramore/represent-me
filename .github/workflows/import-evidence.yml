@@ -22,6 +22,7 @@ jobs:
           CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
       - run: npm test && npm run validate:evidence && npm run validate:imports
       - name: Open review PR for new source material
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automated/daily-evidence-import
