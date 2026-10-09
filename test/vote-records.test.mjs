@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { filterVoteRecords, formatVoteDate, officialVoteUrl } from "../vote-records.mjs";
 
 const house = {
@@ -32,4 +33,8 @@ test("search and recorded-vote filtering work together, newest records first", (
 test("dates are formatted and invalid dates are handled", () => {
   assert.equal(formatVoteDate("2025-01-14T23:00:00Z"), "Jan 14, 2025");
   assert.equal(formatVoteDate("invalid"), "Date unavailable");
+});
+test("index requests a versioned evidence script to avoid stale cached renderers", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(html, /evidence\.js\?v=[^"]+/);
 });
