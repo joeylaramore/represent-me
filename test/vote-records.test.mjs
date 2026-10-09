@@ -27,7 +27,7 @@ test("search and recorded-vote filtering work together, newest records first", (
   const filtered = filterVoteRecords(votes, { query: "pass", choice: "Nay" });
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0].question, "Final passage");
-  assert.equal(filterVoteRecords(votes, { query: "senate" })[0], senate);
+  assert.equal(filterVoteRecords(votes, { query: "cloture" })[0], senate);
 });
 test("dates are formatted and invalid dates are handled", () => {
   assert.equal(formatVoteDate("2025-01-14T23:00:00Z"), "Jan 14, 2025");
