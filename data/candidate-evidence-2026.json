@@ -1,7 +1,206 @@
 {
   "schemaVersion": 1,
   "election": "2026-11-03",
-  "status": "research-in-progress",
-  "note": "No candidate-specific assertions are published until supported by traceable citations. Empty evidence is not evidence of no position or no record.",
-  "candidates": []
+  "status": "published-selected-cross-checked",
+  "note": "These selected summaries attribute campaign statements to the campaign and link independent reporting or official records that corroborate specific actions. Corroboration does not establish motive, policy effectiveness, or the full campaign characterization. This is not an endorsement. Missing information is not a negative assessment.",
+  "candidates": [
+    {
+      "name": "Jon Ossoff",
+      "office": "U.S. Senate",
+      "claims": [
+        {
+          "type": "public-action",
+          "topic": "Healthcare · Medicare insulin costs",
+          "date": "2022-08-15",
+          "summary": "Ossoff’s campaign lists the $35 monthly insulin cap for seniors as part of his record. WGXA reported his public support for the measure, and CMS confirms the Inflation Reduction Act capped the cost of covered Medicare insulin at $35 per month beginning in 2023. These sources confirm the policy and his public advocacy; they do not establish that he alone caused the law.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "WGXA",
+              "title": "Jon Ossoff announces new $35 cap on insulin",
+              "url": "https://wgxa.tv/news/local/its-been-a-long-time-coming-jon-ossoff-announces-new-35-cap-on-insulin"
+            },
+            {
+              "publisher": "Centers for Medicare & Medicaid Services",
+              "title": "Anniversary of the Inflation Reduction Act: Update on CMS Implementation",
+              "url": "https://www.cms.gov/newsroom/fact-sheets/anniversary-inflation-reduction-act-update-cms-implementation"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Housing · affordability",
+          "date": "2025-05-07",
+          "summary": "Ossoff’s campaign lists lowering housing costs among his accomplishments. The Atlanta Journal-Constitution reported that he opened an investigation into corporate landlords and their possible effect on housing affordability and availability. The reporting confirms the inquiry, not that housing prices fell.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "The Atlanta Journal-Constitution",
+              "title": "Ossoff launches investigation into corporate takeover of Atlanta housing market",
+              "url": "https://www.ajc.com/news/atlanta-news/ajc-series-inspires-ossoff-probe-of-investor-ownership-in-housing/HUIDEGPFWNHPVM5QKHKARTRKQI/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Child welfare · Georgia foster care",
+          "date": "2024-04-09",
+          "summary": "The campaign says Ossoff exposed abuses in Georgia’s foster care system. A Senate Judiciary Subcommittee staff report from his inquiry documented serious safety failures; The Imprint reported that Georgia officials disputed the findings. This verifies the investigation, report, and public disagreement, not a court judgment.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "U.S. Senate Committee on the Judiciary",
+              "title": "Abuse and Neglect of Children in Georgia’s Foster Care System: A Case Study",
+              "url": "https://www.judiciary.senate.gov/imo/media/doc/230414_HRL_Foster%20Care_Report_final.pdf"
+            },
+            {
+              "publisher": "The Imprint",
+              "title": "U.S. Senate Investigation Finds ‘Systemic Failures’ to Keep Georgia Foster Kids Safe",
+              "url": "https://imprintnews.org/child-welfare-2/us-senate-investigation-finds-systemic-failures-to-keep-georgia-foster-kids-safe/248731"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Online child safety",
+          "date": "2024-05-08",
+          "summary": "The campaign says Ossoff worked to address online exploitation of children. Senate Judiciary records identify him as a co-author of the REPORT Act, and Capitol Beat reported that the law was signed in May 2024 and requires platforms to report specified child-exploitation crimes. This documents the law’s scope, not its effectiveness.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "U.S. Senate Committee on the Judiciary",
+              "title": "Senate Judiciary Committee Advances Bipartisan Bill to Protect Children from Online Sexual Exploitation",
+              "url": "https://www.judiciary.senate.gov/press/releases/senate-judiciary-committee-advances-bipartisan-bill-to-protect-children-from-online-sexual-exploitation"
+            },
+            {
+              "publisher": "Capitol Beat News Service",
+              "title": "Biden signs Ossoff-sponsored online child safety bill",
+              "url": "https://capitol-beat.org/2024/05/biden-signs-ossoff-sponsored-online-child-safety-bill/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Border security · drug detection",
+          "date": "2024-12-18",
+          "summary": "The campaign lists strengthening border security among Ossoff’s work. WRDW reported on his DETECT Fentanyl and Xylazine Act, and his Senate office’s four-year report says the bipartisan measure became law and directs DHS to develop drug-detection technology for use at the border. These sources document that law, not its effect on border security.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "WRDW",
+              "title": "From ag aid to fighting drugs at border, Ossoff touts progress",
+              "url": "https://www.wrdw.com/2024/12/18/ag-aid-fighting-drugs-border-ossoff-touts-progress/"
+            },
+            {
+              "publisher": "U.S. Senator Jon Ossoff",
+              "title": "Four-Year Report",
+              "url": "https://www.ossoff.senate.gov/four-year-report/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Public safety · law-enforcement hiring",
+          "date": "2023-03-30",
+          "summary": "The campaign says Ossoff worked to strengthen public safety. WSB-TV reported that he introduced the bipartisan Filling Public Safety Vacancies Act to provide hiring support for state and local law-enforcement agencies. The source confirms the bill’s introduction and purpose, not that it became law or improved public safety.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "WSB-TV",
+              "title": "Ossoff introduces bill to boost funding for law enforcement recruits amid staff shortages",
+              "url": "https://www.wsbtv.com/news/local/atlanta/ossoff-introduces-bill-boost-funding-law-enforcement-recruits-amid-staff-shortages/2DIFGUB4DVDXBCSLCI7R6VQRNU/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Opioid response · rural communities",
+          "date": "2022-12-20",
+          "summary": "The campaign lists tackling the opioid epidemic as part of Ossoff’s record. Capitol Beat reported that his Rural Opioid Abuse Prevention Act was signed into law and created a program directing resources toward prevention and treatment in rural communities. This confirms enactment and the program’s stated purpose, not a measured reduction in overdoses.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "Capitol Beat News Service",
+              "title": "Ossoff-sponsored bill focusing on rural opioid abuse signed into law",
+              "url": "https://capitol-beat.org/2022/12/ossoff-sponsored-bill-focusing-on-rural-opioid-abuse-signed-into-law/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Education · Georgia HBCUs",
+          "date": "2022-04-20",
+          "summary": "The campaign says Ossoff helped deliver record funding for Georgia’s HBCUs. Georgia Recorder reported that he and Senator Warnock said they had secured more than $250 million in supplemental investment and documented a specific $2.5 million Spelman grant. The $250 million figure is attributed to the senators, not independently audited by that report.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "Georgia Recorder",
+              "title": "Ossoff promotes HBCU and Atlanta Beltline federal funding during Congress’ spring break",
+              "url": "https://georgiarecorder.com/2022/04/20/ossoff-promotes-hbcu-and-atlanta-beltline-federal-funding-during-congress-spring-break/"
+            },
+            {
+              "publisher": "U.S. Senator Jon Ossoff",
+              "title": "One-Year Report",
+              "url": "https://www.ossoff.senate.gov/one-year-report/"
+            }
+          ]
+        },
+        {
+          "type": "public-action",
+          "topic": "Federal prisons · oversight and safety",
+          "date": "2024-07-26",
+          "summary": "The campaign says Ossoff exposed abuses and corruption in prisons. The Federal Prison Oversight Act he introduced became law in 2024, establishing inspections and an independent ombudsman; Capitol Beat and AP reported on the law and its oversight provisions. This confirms legislative action, not that all prison abuses were resolved.",
+          "sources": [
+            {
+              "publisher": "Jon Ossoff campaign",
+              "title": "About Jon — campaign record and priorities",
+              "url": "https://electjon.com/bio/"
+            },
+            {
+              "publisher": "Capitol Beat News Service",
+              "title": "Biden signs prison oversight bill sponsored by Ossoff, McBath",
+              "url": "https://capitol-beat.org/2024/07/biden-signs-prison-oversight-bill-sponsored-by-ossoff-mcbath/"
+            },
+            {
+              "publisher": "Associated Press",
+              "title": "Biden signs bill strengthening oversight of crisis-plagued US Bureau of Prisons after AP reporting",
+              "url": "https://apnews.com/article/federal-prisons-congress-oversight-abuse-transparency-biden-397d95d00d507a95c58dc0f78ada0407"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
