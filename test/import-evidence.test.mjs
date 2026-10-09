@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport,request} from '../scripts/import-evidence.mjs';
+import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractSenateVoteNumbers,mergeRows,currentCongress,runImport,request,fetchFirstPartyResponse} from '../scripts/import-evidence.mjs';
 
 test('Senate vote records retain the official roll call, date, question, source, and member vote',()=>{
  const xml=`<roll_call_vote><congress>119</congress><session>2</session><vote_number>42</vote_number><vote_date>June 3, 2026, 2:01 PM</vote_date><vote_question_text><![CDATA[On Passage of the Bill]]></vote_question_text><vote_result_text>Bill Passed (51-49)</vote_result_text><members><member><last_name>Ossoff</last_name><state>GA</state><vote_cast>Nay</vote_cast></member></members></roll_call_vote>`;
@@ -38,3 +38,25 @@ test('daily importer fails clearly when the Congress.gov credential is absent',a
 });
 
 test('transient Senate access denial is retried before failing the import',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;return calls===1?new Response('denied',{status:403,statusText:'Forbidden'}):new Response('<votes/>',{status:200})};try{const response=await request('https://www.senate.gov/example.xml');assert.equal(response.status,200);assert.equal(calls,2)}finally{globalThis.fetch=original}});
+
+test('position fetch stops before following a redirect to another host',async()=>{
+ const original=globalThis.fetch;const requests=[];
+ globalThis.fetch=async(url,options)=>{requests.push({url:String(url),options});return new Response(null,{status:302,headers:{location:'https://secure.actblue.com/donate/example'}})};
+ try{
+  const result=await fetchFirstPartyResponse('https://electjon.com/');
+  assert.equal(result.redirected,true);assert.equal(result.targetHost,'secure.actblue.com');assert.equal(result.response,null);
+  assert.equal(requests.length,1);assert.equal(requests[0].options.redirect,'manual');
+  assert.equal(requests[0].options.headers.referer,undefined);
+ }finally{globalThis.fetch=original}
+});
+
+test('position fetch follows same-host HTTPS redirects without sending a Senate referrer',async()=>{
+ const original=globalThis.fetch;const requests=[];
+ globalThis.fetch=async(url,options)=>{requests.push({url:String(url),options});return requests.length===1?new Response(null,{status:301,headers:{location:'/issues/'}}):new Response('<html><title>Issues</title></html>',{status:200})};
+ try{
+  const result=await fetchFirstPartyResponse('https://candidate.example/');
+  assert.equal(result.redirected,false);assert.equal(result.response.status,200);
+  assert.deepEqual(requests.map(x=>new URL(x.url).pathname),['/','/issues/']);
+  assert.ok(requests.every(x=>x.options.redirect==='manual'&&!('referer' in x.options.headers)));
+ }finally{globalThis.fetch=original}
+});
