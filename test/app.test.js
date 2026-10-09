@@ -6,6 +6,6 @@ test('questionnaire persists locally',()=>assert.match(fs.readFileSync('app.js',
 
 test('questionnaire entry copy matches six current-issue questions',()=>assert.match(html,/Take the 6-question questionnaire/))
 
-test('published image includes the evidence module dependency',()=>{assert.match(fs.readFileSync('Dockerfile','utf8'),/evidence\\.js vote-records\\.mjs/);assert.match(html,/type="module" src="evidence\\.js\\?v=/)});
-test('compare page explains the path to candidate vote records',()=>{assert.match(html,/expand <strong>Votes &amp; positions<\\/strong>/);assert.match(html,/Official voting record/)});
+test('published image includes the evidence module dependency',()=>{assert.ok(fs.readFileSync('Dockerfile','utf8').includes('evidence.js vote-records.mjs'));assert.ok(html.includes('type="module" src="evidence.js?v='))});
+test('compare page explains the path to candidate vote records',()=>{assert.ok(html.includes('expand <strong>Votes &amp; positions</strong>'));assert.ok(html.includes('Official voting record'))});
 test('every static in-page link has a matching target',()=>{for(const [,target] of html.matchAll(/href="#([^"]+)"/g)){assert.ok(html.includes('id="'+target+'"')||html.includes("id='"+target+"'"),'Missing in-page target: #'+target)}});
