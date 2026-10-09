@@ -1,5 +1,5 @@
 // Official vote rows are shown as recorded, without inferring motive or an overall position.
-import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-records.mjs";
+import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=bd2351b";
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
