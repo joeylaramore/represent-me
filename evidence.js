@@ -23,12 +23,13 @@ import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-recor
     const rendered = items.map(claim => {
       const sources = Array.isArray(claim.sources) ? claim.sources.filter(source => source && /^https:\/\//.test(source.url) && source.publisher && source.title) : [];
       if (!sources.length || !claim.summary || !claim.type || !claim.topic || !claim.date) return "";
+      const preview = claim.summary.length > 180 ? claim.summary.slice(0, 177).trimEnd() + "…" : claim.summary;
       const links = sources.map(source => '<li><a href="' + escapeHtml(source.url) + '" target="_blank" rel="noopener noreferrer">Read ' + escapeHtml(source.publisher) + " source text: " + escapeHtml(source.title) + ' ↗</a></li>').join("");
-      return '<article class="evidence-claim"><p class="evidence-meta">' + escapeHtml(claim.topic) + " · " + escapeHtml(claim.type) + " · " + escapeHtml(claim.date) + '</p><p class="evidence-summary">' + escapeHtml(claim.summary) + '</p><details><summary>Read actual source text (' + sources.length + ')</summary><ul>' + links + "</ul></details>" + (sources.length < 2 ? "<small>One source available; independent corroboration pending.</small>" : "") + "</article>";
+      const corroboration = sources.length < 2 ? "<small>One source available; independent corroboration pending.</small>" : "";
+      return '<details class="evidence-claim"><summary><span class="evidence-meta">' + escapeHtml(claim.topic) + " · " + escapeHtml(claim.date) + " · " + escapeHtml(claim.type) + '</span><span class="evidence-preview">' + escapeHtml(preview) + '</span><span class="evidence-expand-hint">Expand for context &amp; citations</span></summary><div class="evidence-detail"><p class="evidence-summary">' + escapeHtml(claim.summary) + '</p>' + corroboration + '<details class="evidence-sources"><summary>Sources and cross-checks (' + sources.length + ')</summary><ul>' + links + "</ul></details></div></details>";
     }).join("");
-    return rendered || '<p class="evidence-empty">No sourced candidate claims published yet. This does not mean the candidate has no positions or record.</p>';
+    return rendered ? '<div class="evidence-claim-list">' + rendered + '</div>' : '<p class="evidence-empty">No sourced candidate claims published yet. This does not mean the candidate has no positions or record.</p>';
   }
-
   function renderVoteCard(vote) {
     const sourceUrl = officialVoteUrl(vote);
     const linkLabel = vote.chamber === "house" ? "House Clerk roll-call record" : "Senate.gov roll-call record (XML)";
@@ -87,7 +88,7 @@ import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-recor
       const panel = document.createElement("details");
       panel.className = "candidate-evidence";
       const title = document.createElement("summary");
-      title.textContent = "Votes & positions — read the source text";
+      title.textContent = "Candidate research — summaries, votes & sources";
       panel.appendChild(title);
       const content = document.createElement("div");
       content.className = "evidence-candidates";
