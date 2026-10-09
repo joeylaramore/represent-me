@@ -15,9 +15,11 @@ test('position snapshot stores first-party metadata and a content hash, not scra
  assert.equal(snapshot.contentSha256,extractPositionMetadata('<html><head> <title>Issues &amp; priorities</title> <meta name="description" content="Public priorities"><link rel="canonical" href="https://candidate.example/issues"></head></html>','https://candidate.example/').contentSha256);
 });
 
-test('House member rows are selected by official Bioguide ID and votes merge without duplicates',()=>{
- const rows=extractHouseEntries({houseRollCallVoteMemberVotes:{results:{item:[{bioguideId:'J000311',voteCast:'Aye'}]}}});
- assert.equal(rows[0].bioguideId,'J000311');assert.deepEqual(mergeRows([{id:'a'},{id:'b'}],[{id:'b',vote:'Nay'},{id:'c'}],x=>x.id),[{id:'a'},{id:'b',vote:'Nay'},{id:'c'}]);
+test('House member rows parse official results arrays and legacy item wrappers',()=>{
+ const official=extractHouseEntries({houseRollCallVoteMemberVotes:{results:[{bioguideID:'J000311',voteCast:'Aye'}]}});
+ const legacy=extractHouseEntries({houseRollCallVoteMemberVotes:{results:{item:[{bioguideId:'J000311',voteCast:'Aye'}]}}});
+ assert.equal(official[0].bioguideID,'J000311');assert.equal(legacy[0].bioguideId,'J000311');
+ assert.deepEqual(mergeRows([{id:'a'},{id:'b'}],[{id:'b',vote:'Nay'},{id:'c'}],x=>x.id),[{id:'a'},{id:'b',vote:'Nay'},{id:'c'}]);
 });
 
 test('current Congress and session calculation follows the two-year congressional cycle',()=>{

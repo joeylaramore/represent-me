@@ -23,7 +23,7 @@ function extractPositionMetadata(html,url){
 }
 function extractHouseEntries(payload){
  const root=payload?.houseRollCallVoteMemberVotes||payload?.houseRollCallVote||payload;
- const rows=root?.results?.item||root?.houseRollCallVoteMemberVotes?.results?.item||[];
+ const rows=Array.isArray(root?.results)?root.results:root?.results?.item||root?.houseRollCallVoteMemberVotes?.results?.item||[];
  return (Array.isArray(rows)?rows:[rows]).filter(Boolean);
 }
 function extractHouseVotes(payload){
