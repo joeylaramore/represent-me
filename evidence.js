@@ -49,6 +49,16 @@ import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-recor
       details.dataset.loaded = "true";
       const search = details.querySelector(".vote-search");
       const choice = details.querySelector(".vote-choice");
+      const allOption = document.createElement("option");
+      allOption.value = "all";
+      allOption.textContent = "All votes";
+      choice.replaceChildren(allOption);
+      [...new Set(records.map(vote => vote.vote).filter(Boolean))].sort((a, b) => a.localeCompare(b)).forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        choice.appendChild(option);
+      });
       const more = details.querySelector(".vote-more");
       let visibleLimit = 20;
       const update = () => {
@@ -106,7 +116,10 @@ import { filterVoteRecords, officialVoteUrl, formatVoteDate } from "./vote-recor
         choiceLabel.textContent = "Filter by recorded vote";
         const choice = document.createElement("select");
         choice.className = "vote-choice";
-        choice.innerHTML = '<option value="all">All votes</option><option>Yea</option><option>Nay</option><option>Present</option><option>Not Voting</option>';
+        const all = document.createElement("option");
+        all.value = "all";
+        all.textContent = "All votes";
+        choice.appendChild(all);
         choiceLabel.appendChild(choice);
         controls.append(searchLabel, choiceLabel);
         records.appendChild(controls);
