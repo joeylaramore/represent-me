@@ -83,3 +83,20 @@
 .question-skip{display:block;margin:12px 0 0;border:0;background:transparent;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer}
 
 [hidden]{display:none!important}
+
+/* Official roll-call records inside each candidate's evidence panel. */
+.official-votes{margin:10px 0 16px;border:1px solid var(--line);background:#fbfcf8;padding:12px}
+.official-votes>summary{color:var(--green);font-weight:700;cursor:pointer}
+.vote-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.45fr);gap:12px;margin:12px 0}
+.vote-controls label{display:grid;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
+.vote-controls input,.vote-controls select{min-width:0;width:100%;padding:10px;border:1px solid #aebbb2;border-radius:3px;background:#fff;color:var(--ink);font:inherit}
+.vote-status{font-size:13px;color:var(--muted)}
+.vote-record{padding:12px 0;border-top:1px solid var(--line)}
+.vote-record h6{font:700 15px/1.35 Arial,sans-serif;margin:4px 0}
+.vote-record p{margin:4px 0;font-size:13px}
+.vote-record a{color:var(--green);font-size:13px;font-weight:700}
+.vote-meta{color:var(--muted)}
+.vote-outcome span{color:var(--muted)}
+.vote-more{margin:10px 0}
+.candidate-claims-heading{font:700 16px Arial,sans-serif;margin:20px 0 8px}
+@media(max-width:600px){.vote-controls{grid-template-columns:1fr}.official-votes{padding:10px}.vote-record a{display:inline-block;padding:6px 0}}
