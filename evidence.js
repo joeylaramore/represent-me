@@ -1,5 +1,5 @@
 // Official vote rows are shown as recorded, without inferring motive or an overall position.
-import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=vote-groups-1";
+import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=vote-groups-1";
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
@@ -37,13 +37,22 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, officialVoteUr
     const category = classifyVoteRecord(vote);
     const categoryLabel = category === "procedural" ? "Procedural action" : category === "legislation" ? "Bill or amendment vote" : "Action type not classified";
     const hasReviewedContext = vote.contextReviewed === true && vote.purpose && vote.effect;
+    const proceduralGuide = !hasReviewedContext ? summarizeProceduralVote(vote) : null;
     const contextSources = hasReviewedContext && Array.isArray(vote.contextSources)
       ? '<ul class="vote-context-sources">' + vote.contextSources.filter(source => source && source.title && /^https:\/\//.test(source.url)).map(source => '<li><a href="' + escapeHtml(source.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(source.title) + ' ↗</a></li>').join("") + "</ul>"
       : "";
-    const context = hasReviewedContext
+    const reviewedContext = hasReviewedContext
       ? '<div class="vote-explanation"><p><strong>What it was for:</strong> ' + escapeHtml(vote.purpose) + '</p><p><strong>What it would do:</strong> ' + escapeHtml(vote.effect) + '</p>' + contextSources + '</div>'
-      : '<p class="vote-context-pending">Plain-language purpose and effect have not been reviewed for this roll call. The official question and linked measure are provided so you can check the source.</p>';
-    return '<article class="vote-record"><p class="vote-meta">' + escapeHtml(categoryLabel) + " · " + escapeHtml(formatVoteDate(vote.date)) + " · " + escapeHtml(vote.memberOffice || vote.chamber) + '</p><h6>' + escapeHtml(vote.question || "Roll-call vote") + '</h6>' + context + '<p class="vote-outcome"><strong>Recorded vote:</strong> ' + escapeHtml(vote.vote || "Not reported") + ' <span>· Question result: ' + escapeHtml(vote.result || "Not reported") + "</span></p>" + (vote.billUrl && /^https:\/\/www\.congress\.gov\//.test(vote.billUrl) ? '<p><a href="' + escapeHtml(vote.billUrl) + '" target="_blank" rel="noopener noreferrer">Related measure on Congress.gov ↗</a></p>' : "") + link + "</article>";
+      : "";
+    const proceduralContext = proceduralGuide
+      ? '<div class="vote-explanation"><p><strong>What it was for:</strong> ' + escapeHtml(proceduralGuide.purpose) + '</p><p><strong>What it would do:</strong> ' + escapeHtml(proceduralGuide.effect) + '</p><p class="vote-source-note">General Senate procedure, not a summary of the underlying bill. <a href="' + escapeHtml(proceduralGuide.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(proceduralGuide.sourceTitle) + ' ↗</a></p></div>'
+      : "";
+    const context = reviewedContext || proceduralContext || '<p class="vote-context-pending">Plain-language purpose and effect have not been reviewed for this roll call. The official question and linked measure are provided so you can check the source.</p>';
+    const question = escapeHtml(vote.question || "Roll-call vote");
+    const date = escapeHtml(formatVoteDate(vote.date));
+    const recordedVote = escapeHtml(vote.vote || "Not reported");
+    const result = escapeHtml(vote.result || "Not reported");
+    return '<details class="vote-record"><summary><span class="vote-row-meta">' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</span><span class="vote-row-question">' + question + '</span><span class="vote-row-choice">' + recordedVote + '</span></summary><div class="vote-detail"><p class="vote-meta">' + escapeHtml(categoryLabel) + ' · ' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</p><h6>' + question + '</h6>' + context + '<p class="vote-outcome"><strong>Recorded vote:</strong> ' + recordedVote + ' <span>· Question result: ' + result + '</span></p>' + (vote.billUrl && /^https:\/\/www\.congress\.gov\//.test(vote.billUrl) ? '<p><a href="' + escapeHtml(vote.billUrl) + '" target="_blank" rel="noopener noreferrer">Related measure on Congress.gov ↗</a></p>' : "") + link + '</div></details>';
   }
 
   async function openVotePanel(details, candidateName) {
@@ -75,7 +84,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, officialVoteUr
         const filtered = filterVoteRecords(records, { query: search.value, choice: choice.value });
         const visible = filtered.slice(0, visibleLimit);
         const groups = groupVoteRecords(visible);
-        output.innerHTML = groups.map(group => '<section class="vote-group" aria-labelledby="vote-group-' + group.id + '"><h5 id="vote-group-' + group.id + '">' + group.title + ' <span>(' + group.records.length + ')</span></h5><p>' + group.description + '</p>' + group.records.map(renderVoteCard).join("") + '</section>').join("") || '<p class="evidence-empty">No roll-call records match these filters.</p>';
+        output.innerHTML = groups.map(group => '<details class="vote-group"><summary><span>' + group.title + '</span><span class="vote-group-count">' + group.records.length + ' shown</span></summary><div class="vote-group-body"><p>' + group.description + '</p>' + group.records.map(renderVoteCard).join("") + '</div></details>').join("") || '<p class="evidence-empty">No roll-call records match these filters.</p>';
         status.textContent = "Showing " + visible.length + " of " + filtered.length + " matching records" + (records.length !== filtered.length ? " (" + records.length + " total)." : ".");
         more.hidden = visible.length >= filtered.length;
       };
