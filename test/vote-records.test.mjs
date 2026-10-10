@@ -73,3 +73,11 @@ test("Senate procedural summaries explain cloture and motion to proceed without 
   assert.match(proceed.effect, /does not pass the measure/);
   assert.equal(summarizeProceduralVote({ chamber: "senate", question: "On Passage of the Bill S. 4668" }), null);
 });
+
+test("vote results use collapsed group summaries and compact, expandable records", () => {
+  const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
+  assert.match(source, /<details class="vote-group"><summary>/);
+  assert.match(source, /<details class="vote-record"><summary>/);
+  assert.match(source, /vote-row-question/);
+  assert.match(source, /vote-row-choice/);
+});
