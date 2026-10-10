@@ -1,5 +1,5 @@
 // Official vote rows are shown as recorded, without inferring motive or an overall position.
-import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=plain-language-votes-1";
+import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=clear-vote-filter-1";
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
@@ -76,7 +76,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       [...new Set(records.map(vote => vote.vote).filter(Boolean))].sort((a, b) => a.localeCompare(b)).forEach(value => {
         const option = document.createElement("option");
         option.value = value;
-        option.textContent = value;
+        option.textContent = ({ Yea: "Voted yes", Nay: "Voted no", Aye: "Voted yes", No: "Voted no", "Not Voting": "Did not vote" })[value] || value;
         choice.appendChild(option);
       });
       const more = details.querySelector(".vote-more");
