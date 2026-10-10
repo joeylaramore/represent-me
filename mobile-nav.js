@@ -25,12 +25,14 @@
  document.querySelector('.brand')?.addEventListener('click',event=>{if(document.body.dataset.mobileView){event.preventDefault();showHome({push:true})}});
  window.addEventListener('popstate',()=>{const view=new URL(location.href).searchParams.get('view');if(pages[view])setView(view,{scroll:false});else showHome({scroll:false})});
  const scrollPrefix='represent-me-scroll:';
- window.addEventListener('pagehide',()=>{try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}});
+ const saveScroll=()=>{try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}};
+ window.addEventListener('scroll',saveScroll,{passive:true});
+ window.addEventListener('pagehide',saveScroll);
  function restoreSavedScroll(y){
   let userMoved=false;const stop=()=>{userMoved=true;['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
   ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.addEventListener(type,stop,{once:true,passive:true}));
   const started=performance.now();
-  const restore=()=>{if(userMoved)return;window.scrollTo({top:y,behavior:'instant'});if(performance.now()-started<900)requestAnimationFrame(restore);else ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
+  const restore=()=>{if(userMoved)return;window.scrollTo({top:y,behavior:'instant'});if(performance.now()-started<1800)requestAnimationFrame(restore);else ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
   requestAnimationFrame(restore);
  }
  const initial=new URL(location.href).searchParams.get('view');
