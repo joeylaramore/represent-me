@@ -10,10 +10,10 @@ test('initial route and browser history preserve the browser-restored scroll pos
 
 test('refresh saves and restores scroll after page layout settles',()=>{assert.match(js,/sessionStorage\.setItem\(scrollPrefix\+location\.pathname\+location\.search/);assert.match(js,/history\.scrollRestoration='manual'/);assert.match(js,/window\.addEventListener\('load',restore/);assert.match(js,/performance\.now\(\)-started<1800/)});
 
-test('mobile navigation and readable styles use fresh browser cache versions',()=>{assert.match(html,/styles\.css\?v=representative-flow-1/);assert.match(html,/mobile-nav\.js\?v=scroll-restore-2/)});
+test('mobile navigation and readable styles use fresh browser cache versions',()=>{assert.match(html,/styles\.css\?v=representative-flow-1/);assert.match(html,/mobile-nav\.js\?v=representative-flow-1/)});
 test('scroll position is saved while the reader moves and restored after load',()=>{assert.match(js,/window\.addEventListener\('scroll',saveScroll/);assert.match(js,/sessionStorage\.setItem\(scrollPrefix\+location\.pathname\+location\.search,String\(window\.scrollY\)\)/);assert.match(js,/performance\.now\(\)-started<1800/)});
 
 test('candidate evidence previews and controls are easy to read on mobile',()=>{assert.match(css,/.evidence-preview\{font-size:18px/);assert.match(css,/.evidence-expand-hint\{font-size:17px/);assert.match(css,/.evidence-detail\{font-size:18px/);assert.match(css,/.official-votes>summary\{font-size:19px/)});
 
-test('representatives appear before the election ballot and missing coverage is clear',()=>{assert.ok(html.indexOf('id="representatives"')<html.indexOf('id="contests"'));assert.match(html,/Your representatives/);assert.match(html,/State, county, and school board representatives are still being checked/);assert.match(js,/renderRepresentativeProfiles/);});
+test('representatives appear before the election ballot and missing coverage is clear',()=>{assert.ok(html.indexOf('id="representatives"')<html.indexOf('id="contests"'));assert.match(html,/Your representatives/);assert.match(html,/State, county, and school board representatives are still being checked/);assert.match(js,/#representatives/);});
 test('representative summaries and open controls use readable text and touch targets',()=>{assert.match(css,/\.representative-summary\{font-size:18px/);assert.match(css,/\.representative-details>summary[^\{]*\{min-height:56px/);assert.match(css,/\.representative-card h3\{font:700 28px/);});
