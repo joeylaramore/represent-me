@@ -17,6 +17,25 @@ export function officialVoteUrl(vote) {
   return null;
 }
 
+export function classifyVoteRecord(vote) {
+  const declared = String(vote.category || "").toLocaleLowerCase();
+  if (declared === "procedural" || declared === "legislation") return declared;
+  const question = String(vote.question || "").toLocaleLowerCase().replace(/\s+/g, " ").trim();
+  if (/\b(on passage|final passage|pass the bill|passage of|motion to suspend.*\b(pass|agree)\b|on the amendment|on agreeing to (the )?(amendment|bill|resolution)|on adoption of (the )?(amendment|bill|resolution))\b/.test(question)) return "legislation";
+  if (/\b(cloture|motion to proceed|motion to table|motion to lay on the table|motion to recommit|motion to adjourn|previous question|motion to reconsider)\b/.test(question)) return "procedural";
+  return "unclassified";
+}
+
+export function groupVoteRecords(votes) {
+  const groups = [
+    { id: "procedural", title: "Procedural votes", description: "Votes about how the chamber handles legislation, such as whether to begin debate or end debate.", records: [] },
+    { id: "legislation", title: "Votes on bills and amendments", description: "Votes that advance, amend, or pass legislative text. An amendment vote is not the same as final passage of a bill.", records: [] },
+    { id: "unclassified", title: "Action needs context", description: "The official question alone does not make the type of action clear.", records: [] }
+  ];
+  for (const vote of sortVoteRecords(votes)) groups.find(group => group.id === classifyVoteRecord(vote)).records.push(vote);
+  return groups.filter(group => group.records.length);
+}
+
 export function sortVoteRecords(votes) {
   return [...votes].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }

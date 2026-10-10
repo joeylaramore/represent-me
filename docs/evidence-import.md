@@ -27,3 +27,15 @@ CONGRESS_API_KEY=your-key npm run import:evidence
 npm test
 npm run validate:evidence
 ```
+
+## Plain-language vote context
+
+A vote can receive a reviewed explanation in the research inbox:
+
+- `category`: `procedural` or `legislation`.
+- `purpose`: what the roll call was deciding.
+- `effect`: what the bill or amendment would do if adopted or enacted.
+- `contextReviewed`: set to `true` only after human review.
+- `contextSources`: titled HTTPS citations supporting the explanation.
+
+The site groups votes using this reviewed category when present and question-text rules otherwise. Unclear questions go in “Action needs context.” It shows purpose and effect only when both are reviewed; otherwise it says the explanation is pending. The importer preserves reviewed fields as it refreshes official roll-call rows. Do not infer a bill’s effect from a member’s vote or a motion label alone. Amendments are described as amendments, not as final passage of the whole bill.

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { filterVoteRecords, formatVoteDate, officialVoteUrl } from "../vote-records.mjs";
+import { classifyVoteRecord, filterVoteRecords, formatVoteDate, groupVoteRecords, officialVoteUrl } from "../vote-records.mjs";
 
 const house = {
   chamber: "house", date: "2025-01-14T14:28:00-05:00",
@@ -37,4 +37,29 @@ test("dates are formatted and invalid dates are handled", () => {
 test("index requests a versioned evidence script to avoid stale cached renderers", () => {
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /evidence\.js\?v=[^"]+/);
+});
+
+test("classifies clear procedural actions separately from votes on legislative text", () => {
+  assert.equal(classifyVoteRecord({ question: "On the Cloture Motion" }), "procedural");
+  assert.equal(classifyVoteRecord({ question: "On Motion to Proceed to H.R. 100" }), "procedural");
+  assert.equal(classifyVoteRecord({ question: "On Passage of the Bill" }), "legislation");
+  assert.equal(classifyVoteRecord({ question: "On agreeing to the amendment" }), "legislation");
+  assert.equal(classifyVoteRecord({ question: "On Motion to Suspend the Rules and Pass" }), "legislation");
+  assert.equal(classifyVoteRecord({ question: "On the Question" }), "unclassified");
+});
+test("explicit reviewed category takes precedence and groups records separately", () => {
+  const records = [
+    { ...house, date: "2025-01-14", category: "procedural" },
+    { ...senate, date: "2025-02-04", category: "legislation" },
+    { ...house, date: "2025-03-01", question: "On the Question" }
+  ];
+  const groups = groupVoteRecords(records);
+  assert.deepEqual(groups.map(group => group.id), ["procedural", "legislation", "unclassified"]);
+  assert.equal(groups[0].records[0].date, "2025-01-14");
+});
+test("vote cards require reviewed purpose and effect and disclose missing context", () => {
+  const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
+  assert.match(source, /vote\.contextReviewed === true && vote\.purpose && vote\.effect/);
+  assert.match(source, /Plain-language purpose and effect have not been reviewed/);
+  assert.match(source, /groupVoteRecords\(visible\)/);
 });

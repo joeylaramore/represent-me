@@ -7,6 +7,13 @@ for(const [i,row] of (inbox.votes||[]).entries()){
  const at=`votes[${i}]`;if(!names.has(row.candidate))errors.push(`${at}: candidate is not configured`);
  if(!['house','senate'].includes(row.chamber))errors.push(`${at}: invalid chamber`);
  if(!row.vote)errors.push(`${at}: recorded vote required`);
+ if(row.contextReviewed===true){
+  if(!['procedural','legislation'].includes(row.category))errors.push(`${at}: reviewed context requires category procedural or legislation`);
+  if(typeof row.purpose!=='string'||!row.purpose.trim())errors.push(`${at}: reviewed context requires what the vote was for`);
+  if(typeof row.effect!=='string'||!row.effect.trim())errors.push(`${at}: reviewed context requires what the measure would do`);
+  if(!Array.isArray(row.contextSources)||!row.contextSources.length)errors.push(`${at}: reviewed context requires citation sources`);
+  for(const [j,source] of (row.contextSources||[]).entries()){try{if(!source||typeof source.title!=='string'||!source.title.trim())throw new Error();const u=new URL(source.url);if(u.protocol!=='https:')errors.push(`${at}.contextSources[${j}]: HTTPS URL required`)}catch{errors.push(`${at}.contextSources[${j}]: title and valid HTTPS citation URL required`)}}
+ }
  try{const u=new URL(row.sourceUrl);if(u.protocol!=='https:'||!['api.congress.gov','www.senate.gov'].includes(u.hostname))errors.push(`${at}: source must be an official HTTPS vote record`)}catch{errors.push(`${at}: valid source URL required`)}
 }
 for(const [i,row] of (inbox.positionSources||[]).entries()){
