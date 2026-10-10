@@ -38,7 +38,7 @@ test("index requests a versioned evidence script to avoid stale cached renderers
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /evidence\.js\?v=[^"]+/);
   const evidence = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
-  assert.match(evidence, /vote-records\.mjs\?v=compact-votes-1/);
+  assert.match(evidence, /vote-records\.mjs\?v=plain-language-votes-1/);
 });
 
 test("classifies clear procedural actions separately from votes on legislative text", () => {
@@ -62,7 +62,7 @@ test("explicit reviewed category takes precedence and groups records separately"
 test("vote cards require reviewed purpose and effect and disclose missing context", () => {
   const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
   assert.match(source, /vote\.contextReviewed === true && vote\.purpose && vote\.effect/);
-  assert.match(source, /Plain-language purpose and effect have not been reviewed/);
+  assert.match(source, /We have not yet checked what this vote would do/);
   assert.match(source, /groupVoteRecords\(visible\)/);
 });
 
@@ -83,3 +83,17 @@ test("vote results use collapsed group summaries and compact, expandable records
   assert.match(source, /vote-row-question/);
   assert.match(source, /vote-row-choice/);
 });
+
+test("vote groups use plain language and a readable layout", () => {
+  const votes = readFileSync(new URL("../vote-records.mjs", import.meta.url), "utf8");
+  const evidence = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
+  const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
+  assert.match(votes, /How lawmakers handle a bill/);
+  assert.match(votes, /Votes on a bill or amendment/);
+  assert.match(votes, /We need more information/);
+  assert.match(evidence, /Search a bill, date, or result/);
+  assert.match(styles, /font-size:16px/);
+  assert.match(styles, /min-height:48px/);
+});
+
+test("plain-language vote categories are present", () => { const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8"); assert.match(source, /A vote about how Congress works/); assert.match(source, /Voted yes/); });
