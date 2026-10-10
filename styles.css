@@ -192,3 +192,27 @@
  .evidence-sources>summary,.evidence-sources ul{font-size:17px;line-height:1.65}
  .official-votes>summary{font-size:19px;line-height:1.5}
 }
+
+/* Calm, single-column summaries with comfortable reading and tap targets. */
+#representatives.section{padding-top:44px;padding-bottom:46px}
+.representative-intro,.representative-scope{font-size:18px;line-height:1.65;max-width:850px}
+.representative-scope{margin-top:24px}
+.representative-scope a{display:inline-block;min-height:48px;padding:10px 0;color:var(--green);font-weight:700}
+.representative-list{display:grid;grid-template-columns:1fr;gap:18px;max-width:900px}
+.representative-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:24px}
+.representative-office{margin:0;color:var(--green);font-size:18px;font-weight:700;line-height:1.5}
+.representative-card h3{font:700 28px/1.25 Arial,sans-serif;letter-spacing:0;margin:6px 0 10px}
+.representative-summary{font-size:18px;line-height:1.65;margin:0 0 8px}
+.representative-official-link{display:inline-flex;align-items:center;min-height:48px;padding:8px 0;color:var(--green);font-size:18px;font-weight:700}
+.representative-details,.representative-claims{margin-top:12px}
+.representative-details>summary,.representative-claims>summary{min-height:56px;display:flex;align-items:center;padding:12px 14px;background:#f1f6f1;color:var(--green);font-size:18px;line-height:1.5;font-weight:700;cursor:pointer}
+.representative-details>.official-votes{margin:12px 0}
+.more-evidence-claims>summary{min-height:52px;display:flex;align-items:center;color:var(--green);font-size:17px;font-weight:700;cursor:pointer}
+@media(max-width:600px){
+ #representatives.section{padding-top:32px;padding-bottom:34px}
+ .representative-intro,.representative-scope{font-size:18px;line-height:1.7}
+ .representative-card{padding:20px}
+ .representative-card h3{font-size:26px}
+ .representative-summary{font-size:18px;line-height:1.7}
+ .representative-details>summary,.representative-claims>summary{font-size:18px;line-height:1.55;padding:14px}
+}

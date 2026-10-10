@@ -3,7 +3,8 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
-  if (!root) return;
+  const representativeRoot = document.getElementById("representative-list");
+  if (!root && !representativeRoot) return;
   const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
   let claims = [];
   try {
@@ -18,18 +19,22 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     .then(response => { if (!response.ok) throw new Error("Vote records unavailable"); return response.json(); })
     .then(json => Array.isArray(json.votes) ? json.votes : []);
 
-  function renderClaims(candidate) {
+  function renderClaims(candidate, limit = Infinity) {
     const items = Array.isArray(candidate?.claims) ? candidate.claims : [];
-    const rendered = items.map(claim => {
+    const renderClaim = claim => {
       const sources = Array.isArray(claim.sources) ? claim.sources.filter(source => source && /^https:\/\//.test(source.url) && source.publisher && source.title) : [];
       if (!sources.length || !claim.summary || !claim.type || !claim.topic || !claim.date) return "";
       const preview = claim.summary.length > 180 ? claim.summary.slice(0, 177).trimEnd() + "…" : claim.summary;
       const links = sources.map(source => '<li><a href="' + escapeHtml(source.url) + '" target="_blank" rel="noopener noreferrer">Read ' + escapeHtml(source.publisher) + " source text: " + escapeHtml(source.title) + ' ↗</a></li>').join("");
       const corroboration = sources.length < 2 ? "<small>One source available; independent corroboration pending.</small>" : "";
-      return '<details class="evidence-claim"><summary><span class="evidence-meta">' + escapeHtml(claim.topic) + " · " + escapeHtml(claim.date) + " · " + escapeHtml(claim.type) + '</span><span class="evidence-preview">' + escapeHtml(preview) + '</span><span class="evidence-expand-hint">Expand for context &amp; citations</span></summary><div class="evidence-detail"><p class="evidence-summary">' + escapeHtml(claim.summary) + '</p>' + corroboration + '<details class="evidence-sources"><summary>Sources and cross-checks (' + sources.length + ')</summary><ul>' + links + "</ul></details></div></details>";
-    }).join("");
-    return rendered ? '<div class="evidence-claim-list">' + rendered + '</div>' : '<p class="evidence-empty">No sourced candidate claims published yet. This does not mean the candidate has no positions or record.</p>';
+      return '<details class="evidence-claim"><summary><span class="evidence-meta">' + escapeHtml(claim.topic) + " · " + escapeHtml(claim.date) + " · " + escapeHtml(claim.type) + '</span><span class="evidence-preview">' + escapeHtml(preview) + '</span><span class="evidence-expand-hint">Open explanation and sources</span></summary><div class="evidence-detail"><p class="evidence-summary">' + escapeHtml(claim.summary) + '</p>' + corroboration + '<details class="evidence-sources"><summary>Sources and cross-checks (' + sources.length + ')</summary><ul>' + links + "</ul></details></div></details>";
+    };
+    const visible = items.slice(0, limit).map(renderClaim).join("");
+    const remaining = items.slice(limit);
+    const more = remaining.length ? '<details class="more-evidence-claims"><summary>Show ' + remaining.length + ' more reviewed summaries</summary><div class="evidence-claim-list">' + remaining.map(renderClaim).join("") + '</div></details>' : "";
+    return visible ? '<div class="evidence-claim-list">' + visible + '</div>' + more : '<p class="evidence-empty">No cross-checked public statement summaries are published yet. Missing coverage is not a negative finding.</p>';
   }
+
   function renderVoteCard(vote) {
     const sourceUrl = officialVoteUrl(vote);
     const linkLabel = vote.chamber === "house" ? "House Clerk roll-call record" : "Senate.gov roll-call record (XML)";
@@ -81,6 +86,12 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       });
       const more = details.querySelector(".vote-more");
       let visibleLimit = 20;
+      if (!records.length) {
+        output.innerHTML = '<p class="evidence-empty">No official vote records are loaded for this lawmaker yet. This is not evidence that no votes exist.</p>';
+        status.textContent = "No vote records are available in this data set yet.";
+        details.dataset.loaded = "true";
+        return;
+      }
       const update = () => {
         const filtered = filterVoteRecords(records, { query: search.value, choice: choice.value });
         const visible = filtered.slice(0, visibleLimit);
@@ -98,6 +109,54 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       status.textContent = "Official roll-call records could not be loaded. Please try again later.";
       details.dataset.loaded = "";
     }
+  }
+
+
+  function makeVotePanel(candidateName) {
+    const records = document.createElement("details"); records.className = "official-votes";
+    records.addEventListener("toggle", () => { if (records.open) openVotePanel(records, candidateName); });
+    const title = document.createElement("summary"); title.textContent = "Recorded votes — tap to open"; records.appendChild(title);
+    const controls = document.createElement("div"); controls.className = "vote-controls";
+    const searchLabel = document.createElement("label"); searchLabel.textContent = "Search votes";
+    const search = document.createElement("input"); search.type = "search"; search.className = "vote-search"; search.placeholder = "Search a bill, date, or result"; searchLabel.appendChild(search);
+    const choiceLabel = document.createElement("label"); choiceLabel.textContent = "Filter by the candidate’s vote";
+    const choice = document.createElement("select"); choice.className = "vote-choice";
+    const all = document.createElement("option"); all.value = "all"; all.textContent = "All votes"; choice.appendChild(all); choiceLabel.appendChild(choice);
+    controls.append(searchLabel, choiceLabel); records.appendChild(controls);
+    const status = document.createElement("p"); status.className = "vote-status"; status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite"); records.appendChild(status);
+    const output = document.createElement("div"); output.className = "vote-results"; records.appendChild(output);
+    const more = document.createElement("button"); more.type = "button"; more.className = "outline vote-more"; more.textContent = "Show next 20"; more.hidden = true; records.appendChild(more);
+    return records;
+  }
+
+  function renderRepresentativeProfiles() {
+    if (!representativeRoot || representativeRoot.dataset.ready === "true") return;
+    const profiles = [
+      { name: "Jon Ossoff", office: "U.S. Senator for Georgia", url: "https://www.ossoff.senate.gov/" },
+      { name: "Raphael Warnock", office: "U.S. Senator for Georgia", url: "https://www.warnock.senate.gov/" },
+      { name: "Brian Jack", office: "U.S. Representative · Georgia District 3", url: "https://jack.house.gov/" }
+    ];
+    representativeRoot.replaceChildren();
+    for (const profile of profiles) {
+      const evidence = claims.find(item => item.name === profile.name);
+      const topics = [...new Set((evidence?.claims || []).map(item => String(item.topic || "").split("·")[0].trim()).filter(Boolean))].slice(0, 3);
+      const card = document.createElement("article"); card.className = "representative-card";
+      const office = document.createElement("p"); office.className = "representative-office"; office.textContent = profile.office;
+      const name = document.createElement("h3"); name.textContent = profile.name;
+      const intro = document.createElement("p"); intro.className = "representative-summary";
+      intro.textContent = topics.length ? "Reviewed summaries cover " + topics.join(", ") + ". Open below for the sources and recorded votes." : "A cross-checked summary is not published yet. We are still checking sources; missing coverage does not mean there is no record.";
+      const link = document.createElement("a"); link.className = "representative-official-link"; link.href = profile.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Official profile ↗";
+      const more = document.createElement("details"); more.className = "representative-details";
+      const summary = document.createElement("summary"); summary.textContent = "Open voting record and source summaries"; more.appendChild(summary);
+      more.appendChild(makeVotePanel(profile.name));
+      const claimsDetails = document.createElement("details"); claimsDetails.className = "representative-claims";
+      const claimsSummary = document.createElement("summary"); claimsSummary.textContent = evidence?.claims?.length ? "Read sourced statements (" + evidence.claims.length + ")" : "Read source summary";
+      claimsDetails.appendChild(claimsSummary);
+      const content = document.createElement("div"); content.innerHTML = evidence?.claims?.length ? renderClaims(evidence, 2) : renderClaims(null);
+      claimsDetails.appendChild(content); more.appendChild(claimsDetails);
+      card.append(office, name, intro, link, more); representativeRoot.appendChild(card);
+    }
+    representativeRoot.dataset.ready = "true";
   }
 
   function enhance() {
@@ -118,47 +177,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
         const heading = document.createElement("h5");
         heading.textContent = name;
         item.appendChild(heading);
-        const records = document.createElement("details");
-        records.className = "official-votes";
-        records.addEventListener("toggle", () => { if (records.open) openVotePanel(records, name); });
-        const recordsTitle = document.createElement("summary");
-        recordsTitle.textContent = "Recorded votes — open to load";
-        records.appendChild(recordsTitle);
-        const controls = document.createElement("div");
-        controls.className = "vote-controls";
-        const searchLabel = document.createElement("label");
-        searchLabel.textContent = "Search votes";
-        const search = document.createElement("input");
-        search.type = "search";
-        search.className = "vote-search";
-        search.placeholder = "Search a bill, date, or result";
-        searchLabel.appendChild(search);
-        const choiceLabel = document.createElement("label");
-        choiceLabel.textContent = "Filter by the candidate’s vote";
-        const choice = document.createElement("select");
-        choice.className = "vote-choice";
-        const all = document.createElement("option");
-        all.value = "all";
-        all.textContent = "All votes";
-        choice.appendChild(all);
-        choiceLabel.appendChild(choice);
-        controls.append(searchLabel, choiceLabel);
-        records.appendChild(controls);
-        const status = document.createElement("p");
-        status.className = "vote-status";
-        status.setAttribute("role", "status");
-        status.setAttribute("aria-live", "polite");
-        records.appendChild(status);
-        const output = document.createElement("div");
-        output.className = "vote-results";
-        records.appendChild(output);
-        const more = document.createElement("button");
-        more.type = "button";
-        more.className = "outline vote-more";
-        more.textContent = "Show next 20";
-        more.hidden = true;
-        records.appendChild(more);
-        item.appendChild(records);
+        item.appendChild(makeVotePanel(name));
         const evidence = claims.find(candidate => candidate.office === office && candidate.name === name);
         const claimsHeading = document.createElement("h6");
         claimsHeading.className = "candidate-claims-heading";
@@ -177,6 +196,8 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       row.appendChild(panel);
     });
   }
+
+  renderRepresentativeProfiles();
 
   new MutationObserver(() => {
     if (root.querySelector(".ballot-row:not(:has(.candidate-evidence))")) enhance();
