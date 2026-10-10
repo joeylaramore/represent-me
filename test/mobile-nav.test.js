@@ -5,3 +5,5 @@ test('view route groups keep related ballot, issue, comparison, and source conte
 test('mobile shortcuts are high contrast, larger, and deployed by the container',()=>{assert.match(css,/background:var\(--green\)/);assert.match(css,/font:700 12px\/1\.1 Arial/);assert.match(css,/min-height:48px/);assert.match(css,/a\[aria-current="page"\]/);assert.match(docker,/mobile-nav\.js/)});
 
 test('focused routes always hide unrelated styled sections',()=>assert.match(css,/\[hidden\]\{display:none!important\}/));
+
+test('initial route and browser history preserve the browser-restored scroll position',()=>{assert.match(js,/function setView\(view,\{push=false,scroll=push\}=\{\}\)/);assert.match(js,/if\(scroll\)window\.scrollTo/);assert.match(js,/setView\(view,\{scroll:false\}\)/);assert.match(js,/setView\(initial,\{scroll:false\}\)/);assert.match(js,/showHome\(\{scroll:false\}\)/)});
