@@ -33,6 +33,16 @@ function extractHouseVotes(payload){
 }
 function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
+function mergeVoteRows(existing,incoming){
+ const map=new Map(existing.map(row=>[row.id,row]));
+ for(const row of incoming){
+  const prior=map.get(row.id)||{};
+  const reviewed=prior.contextReviewed===true?{category:prior.category,purpose:prior.purpose,effect:prior.effect,contextReviewed:true,contextSources:prior.contextSources}:{};
+  const base=prior.contextReviewed===true?prior:Object.fromEntries(Object.entries(prior).filter(([key])=>!['category','purpose','effect','contextReviewed','contextSources'].includes(key)));
+  map.set(row.id,{...base,...row,...reviewed});
+ }
+ return [...map.values()].sort((a,b)=>a.id.localeCompare(b.id));
+}
 function currentCongress(date=new Date()){const year=date.getUTCFullYear();return {congress:Math.floor((year-1789)/2)+1,session:year%2?1:2}}
 export async function request(url,options={}){const safe=new URL(url);safe.searchParams.delete('api_key');let response;for(let attempt=0;attempt<4;attempt++){try{response=await fetch(url,{headers,...options,signal:AbortSignal.timeout(20000)})}catch(error){throw new Error(`Request failed for ${safe} (${error.name||'network error'})`)}if(response.ok||(options.redirect==='manual'&&response.status>=300&&response.status<400))return response;if(![403,429,500,502,503,504].includes(response.status)||attempt===3)throw new Error(`${response.status} ${response.statusText} for ${safe}`);await new Promise(resolve=>setTimeout(resolve,1000*(2**attempt)));}throw new Error(`Request failed for ${safe}`)}
 async function fetchJson(url){return request(url).then(r=>r.json())}
@@ -76,12 +86,12 @@ async function fetchPositions(targets,existing){
  for(const candidate of targets)for(const url of candidate.positionSources||[]){const fetched=await fetchFirstPartyResponse(url);if(fetched.redirected){console.warn(`Skipping position source redirect outside its first-party host for ${candidate.name}: ${new URL(url).hostname} -> ${fetched.targetHost}`);continue;}const html=await fetched.response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
  return rows;
 }
-export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,currentCongress};
+export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress};
 export async function runImport({targetsPathArg=targetsPath,inboxPathArg=inboxPath,apiKey=process.env.CONGRESS_API_KEY,now=new Date()}={}){
  if(!apiKey)throw new Error('Set CONGRESS_API_KEY to use the official Congress.gov House vote API.');
  const targets=JSON.parse(await fs.readFile(targetsPathArg,'utf8'));const inbox=JSON.parse(await fs.readFile(inboxPathArg,'utf8'));const {congress,session}=currentCongress(now);const votes=[];
  for(const s of new Set([session,session===1?2:1])){const year=(s===1?1789+2*(congress-1):1790+2*(congress-1));if(year>now.getUTCFullYear())continue;const house=await fetchHouseVotes(targets.candidates,inbox.votes.filter(v=>v.chamber==='house'),apiKey,congress,s);votes.push(...house.rows);console.log(`Congress.gov House ${congress}/${s}: ${JSON.stringify({...house.diagnostics,newVotes:house.rows.length})}`);votes.push(...await fetchSenateVotes(targets.candidates,inbox.votes.filter(v=>v.chamber==='senate'),congress,s));}
- const positions=await fetchPositions(targets.candidates,inbox.positionSources);const merged={...inbox,votes:mergeRows(inbox.votes,votes,x=>x.id),positionSources:mergeRows(inbox.positionSources,positions,x=>x.candidate+'|'+x.url)};
+ const positions=await fetchPositions(targets.candidates,inbox.positionSources);const merged={...inbox,votes:mergeVoteRows(inbox.votes,votes),positionSources:mergeRows(inbox.positionSources,positions,x=>x.candidate+'|'+x.url)};
  await fs.writeFile(inboxPathArg,JSON.stringify(merged,null,2)+'\n');return {newVotes:votes.length,newPositionSnapshots:positions.length};
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1])runImport().then(count=>console.log(JSON.stringify(count))).catch(error=>{console.error(error.message);process.exitCode=1;});
