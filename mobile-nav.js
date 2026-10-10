@@ -24,5 +24,21 @@
  document.addEventListener('click',event=>{const link=event.target.closest('[data-view]');if(!link)return;event.preventDefault();setView(link.dataset.view,{push:true})});
  document.querySelector('.brand')?.addEventListener('click',event=>{if(document.body.dataset.mobileView){event.preventDefault();showHome({push:true})}});
  window.addEventListener('popstate',()=>{const view=new URL(location.href).searchParams.get('view');if(pages[view])setView(view,{scroll:false});else showHome({scroll:false})});
- const initial=new URL(location.href).searchParams.get('view');if(pages[initial])setView(initial,{scroll:false});
+ const scrollPrefix='represent-me-scroll:';
+ window.addEventListener('pagehide',()=>{try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}});
+ function restoreSavedScroll(y){
+  let userMoved=false;const stop=()=>{userMoved=true;['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
+  ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.addEventListener(type,stop,{once:true,passive:true}));
+  const started=performance.now();
+  const restore=()=>{if(userMoved)return;window.scrollTo({top:y,behavior:'instant'});if(performance.now()-started<900)requestAnimationFrame(restore);else ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
+  requestAnimationFrame(restore);
+ }
+ const initial=new URL(location.href).searchParams.get('view');
+ const savedScroll=sessionStorage.getItem(scrollPrefix+location.pathname+location.search);
+ if(pages[initial])setView(initial,{scroll:false});
+ if(savedScroll!==null&&Number.isFinite(Number(savedScroll))){
+  history.scrollRestoration='manual';
+  const restore=()=>restoreSavedScroll(Number(savedScroll));
+  if(document.readyState==='complete')restore();else window.addEventListener('load',restore,{once:true});
+ }
 })();
