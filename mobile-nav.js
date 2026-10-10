@@ -1,10 +1,10 @@
 (()=>{
  const nav=document.querySelector('.mobile-nav'),main=document.querySelector('main');if(!nav||!main)return;
  const pages={
-  ballot:['#election','.notice','.stats','#location-tools','#explore','#contests','#vote-plan','#ballot-mobile-bar'],
+  ballot:['#election','#representatives','.notice','#explore','#compare','#contests','#location-tools','#vote-plan','#ballot-mobile-bar'],
   explore:['#explore','#vote-plan'],
   issues:['.questionnaire-promo','#beliefs','#value-match'],
-  compare:['#compare','#contests'],
+  compare:['#representatives','#compare','#contests'],
   sources:['#sources','#vote-plan']
  };
  const units=[...main.children],originalOrder=[...main.children],footer=document.querySelector('body > footer');
