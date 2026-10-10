@@ -38,7 +38,7 @@ test("index requests a versioned evidence script to avoid stale cached renderers
   const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   assert.match(html, /evidence\.js\?v=[^"]+/);
   const evidence = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
-  assert.match(evidence, /vote-records\.mjs\?v=compact-votes-1/);
+  assert.match(evidence, /vote-records\.mjs\?v=plain-language-votes-1/);
 });
 
 test("classifies clear procedural actions separately from votes on legislative text", () => {
