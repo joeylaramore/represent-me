@@ -12,3 +12,5 @@ test('every static in-page link has a matching target',()=>{for(const [,target] 
 test('nginx serves the ES module helper with a JavaScript MIME type',()=>{assert.ok(fs.readFileSync('nginx.conf','utf8').includes('location ~ \\.mjs$ { default_type application/javascript; try_files $uri =404; }'))});
 
 test('candidate claims start as previews and reveal context and citations on demand',()=>{const evidence=fs.readFileSync('evidence.js','utf8');assert.ok(evidence.includes('<details class="evidence-claim"><summary>'));assert.ok(evidence.includes('Open explanation and sources'));assert.ok(evidence.includes('<p class="evidence-summary">'));assert.ok(evidence.includes('Sources and cross-checks ('))});
+
+test('representative summaries use plain language and say what is still missing',()=>{const evidence=fs.readFileSync('evidence.js','utf8');assert.match(html,/Federal representatives/);assert.ok(evidence.includes('publicly supported a $35 monthly cap'));assert.ok(evidence.includes('checked summary is not ready yet'));});

@@ -132,25 +132,24 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
   function renderRepresentativeProfiles() {
     if (!representativeRoot || representativeRoot.dataset.ready === "true") return;
     const profiles = [
-      { name: "Jon Ossoff", office: "U.S. Senator for Georgia", url: "https://www.ossoff.senate.gov/" },
+      { name: "Jon Ossoff", office: "U.S. Senator for Georgia", url: "https://www.ossoff.senate.gov/", summary: "He publicly supported a $35 monthly cap for covered Medicare insulin, investigated housing investors, and examined Georgia foster-care safety. The sources document those actions, not whether they solved the broader problems." },
       { name: "Raphael Warnock", office: "U.S. Senator for Georgia", url: "https://www.warnock.senate.gov/" },
       { name: "Brian Jack", office: "U.S. Representative · Georgia District 3", url: "https://jack.house.gov/" }
     ];
     representativeRoot.replaceChildren();
     for (const profile of profiles) {
       const evidence = claims.find(item => item.name === profile.name);
-      const topics = [...new Set((evidence?.claims || []).map(item => String(item.topic || "").split("·")[0].trim()).filter(Boolean))].slice(0, 3);
       const card = document.createElement("article"); card.className = "representative-card";
       const office = document.createElement("p"); office.className = "representative-office"; office.textContent = profile.office;
       const name = document.createElement("h3"); name.textContent = profile.name;
       const intro = document.createElement("p"); intro.className = "representative-summary";
-      intro.textContent = topics.length ? "Reviewed summaries cover " + topics.join(", ") + ". Open below for the sources and recorded votes." : "A cross-checked summary is not published yet. We are still checking sources; missing coverage does not mean there is no record.";
+      intro.textContent = profile.summary || "A checked summary is not ready yet. We are still reviewing sources; missing information does not mean there is no record.";
       const link = document.createElement("a"); link.className = "representative-official-link"; link.href = profile.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Official profile ↗";
       const more = document.createElement("details"); more.className = "representative-details";
-      const summary = document.createElement("summary"); summary.textContent = "Open voting record and source summaries"; more.appendChild(summary);
+      const summary = document.createElement("summary"); summary.textContent = "See votes and sources"; more.appendChild(summary);
       more.appendChild(makeVotePanel(profile.name));
       const claimsDetails = document.createElement("details"); claimsDetails.className = "representative-claims";
-      const claimsSummary = document.createElement("summary"); claimsSummary.textContent = evidence?.claims?.length ? "Read sourced statements (" + evidence.claims.length + ")" : "Read source summary";
+      const claimsSummary = document.createElement("summary"); claimsSummary.textContent = evidence?.claims?.length ? "Statements and sources" : "Source summary not ready yet";
       claimsDetails.appendChild(claimsSummary);
       const content = document.createElement("div"); content.innerHTML = evidence?.claims?.length ? renderClaims(evidence, 2) : renderClaims(null);
       claimsDetails.appendChild(content); more.appendChild(claimsDetails);
