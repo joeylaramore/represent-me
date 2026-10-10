@@ -15,5 +15,5 @@ test('scroll position is saved while the reader moves and restored after load',(
 
 test('candidate evidence previews and controls are easy to read on mobile',()=>{assert.match(css,/.evidence-preview\{font-size:18px/);assert.match(css,/.evidence-expand-hint\{font-size:17px/);assert.match(css,/.evidence-detail\{font-size:18px/);assert.match(css,/.official-votes>summary\{font-size:19px/)});
 
-test('representatives appear before the election ballot and missing coverage is clear',()=>{assert.ok(html.indexOf('id="representatives"')<html.indexOf('id="contests"'));assert.match(html,/Your representatives/);assert.match(html,/State, county, and school board representatives are still being checked/);assert.match(js,/#representatives/);});
+test('representatives appear before the election ballot and missing coverage is clear',()=>{assert.ok(html.indexOf('id="representatives"')<html.indexOf('id="contests"'));assert.match(html,/Federal representatives/);assert.match(html,/State, county, and school board representatives are still being checked/);assert.match(js,/#representatives/);});
 test('representative summaries and open controls use readable text and touch targets',()=>{assert.match(css,/\.representative-summary\{font-size:18px/);assert.match(css,/\.representative-details>summary[^\{]*\{min-height:56px/);assert.match(css,/\.representative-card h3\{font:700 28px/);});
