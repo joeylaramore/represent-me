@@ -166,3 +166,7 @@
  .vote-row-choice{font-size:14px}
  .vote-row-meta{font-size:14px}
 }
+.source-note{font-size:16px;line-height:1.6}
+.vote-controls label,.vote-status{font-size:16px}
+.vote-detail p,.vote-detail li,.vote-detail a{font-size:16px!important;line-height:1.6}
+.vote-detail a{min-height:44px;padding:8px 0}

@@ -99,3 +99,5 @@ test("vote groups use plain language and a readable layout", () => {
 test("plain-language vote categories are present", () => { const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8"); assert.match(source, /A vote about how Congress works/); assert.match(source, /Voted yes/); });
 
 test("vote filter options use everyday words", () => { const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8"); assert.match(source, /Yea: "Voted yes"/); assert.match(source, /Nay: "Voted no"/); assert.match(source, /Not Voting.*Did not vote/); });
+
+test("vote explanations and instructions remain readable", () => { const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8"); assert.match(styles, /source-note\{font-size:16px/); assert.match(styles, /vote-detail p,.vote-detail li,.vote-detail a\{font-size:16px/); });
