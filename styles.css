@@ -170,3 +170,25 @@
 .vote-controls label,.vote-status{font-size:16px}
 .vote-detail p,.vote-detail li,.vote-detail a{font-size:16px!important;line-height:1.6}
 .vote-detail a{min-height:44px;padding:8px 0}
+
+
+/* Make candidate evidence easier to read and open on small screens. */
+.evidence-claim{padding:0 16px}
+.evidence-claim>summary{gap:8px 14px;padding:16px 2px}
+.evidence-claim .evidence-meta{font-size:16px;line-height:1.5}
+.evidence-preview{font-size:17px;line-height:1.6}
+.evidence-expand-hint{font-size:16px;line-height:1.5;text-align:left}
+.evidence-detail{padding:14px 2px 16px;font-size:17px;line-height:1.65}
+.evidence-sources>summary{font-size:16px;line-height:1.5;min-height:44px;display:flex;align-items:center}
+.evidence-sources ul{font-size:16px;line-height:1.6}
+.official-votes>summary{font-size:18px;line-height:1.5;min-height:56px;padding:14px}
+@media(max-width:600px){
+ .evidence-claim{padding:0 14px}
+ .evidence-claim>summary{padding:18px 2px;gap:9px}
+ .evidence-claim .evidence-meta{font-size:17px;line-height:1.5}
+ .evidence-preview{font-size:18px;line-height:1.65}
+ .evidence-expand-hint{font-size:17px;line-height:1.5}
+ .evidence-detail{font-size:18px;line-height:1.7;padding:16px 2px 18px}
+ .evidence-sources>summary,.evidence-sources ul{font-size:17px;line-height:1.65}
+ .official-votes>summary{font-size:19px;line-height:1.5}
+}
