@@ -53,9 +53,9 @@ export function summarizeProceduralVote(vote) {
 
 export function groupVoteRecords(votes) {
   const groups = [
-    { id: "procedural", title: "How lawmakers handle a bill", description: "These votes decide how a bill moves through Congress. They do not pass the bill itself.", records: [] },
-    { id: "legislation", title: "Votes on a bill or amendment", description: "These votes can change a bill or pass it. A vote on an amendment is not the same as passing the whole bill.", records: [] },
-    { id: "unclassified", title: "We need more information", description: "The official record does not explain what this vote was for. We will not guess.", records: [] }
+    { id: "procedural", title: "Procedural votes", description: "Votes about how the chamber handles legislation, such as whether to begin debate or end debate.", records: [] },
+    { id: "legislation", title: "Votes on bills and amendments", description: "Votes that advance, amend, or pass legislative text. An amendment vote is not the same as final passage of a bill.", records: [] },
+    { id: "unclassified", title: "Action needs context", description: "The official question alone does not make the type of action clear.", records: [] }
   ];
   for (const vote of sortVoteRecords(votes)) groups.find(group => group.id === classifyVoteRecord(vote)).records.push(vote);
   return groups.filter(group => group.records.length);

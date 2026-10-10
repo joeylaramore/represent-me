@@ -144,25 +144,3 @@
  .vote-row-question{font-size:14px}
  .vote-row-choice{font-size:12px}
 }
-
-
-/* Readable sizing and spacing for older adults and touch screens. */
-.evidence-candidates{grid-template-columns:1fr;gap:16px}
-.evidence-candidate h3,.evidence-candidate h4{font-size:18px;line-height:1.35}
-.evidence-candidate p,.evidence-candidate li{font-size:16px;line-height:1.6}
-.vote-group>summary{min-height:52px;font-size:17px;line-height:1.4}
-.vote-group-count{font-size:14px}
-.vote-group-body>p,.vote-row-meta{font-size:15px;line-height:1.5}
-.vote-record>summary{min-height:52px}
-.vote-row-question{font-size:16px;line-height:1.45}
-.vote-row-choice{font-size:15px;padding:6px 10px}
-.vote-detail{font-size:16px;line-height:1.6}
-.vote-detail h6{font-size:17px}
-.vote-detail a{display:inline-block;min-height:44px;padding:8px 0}
-.vote-search input,.vote-filter select,.evidence input,.evidence select{min-height:48px;font-size:16px}
-@media(max-width:600px){
- .vote-group>summary{font-size:16px}
- .vote-row-question{font-size:16px}
- .vote-row-choice{font-size:14px}
- .vote-row-meta{font-size:14px}
-}

@@ -1,5 +1,5 @@
 // Official vote rows are shown as recorded, without inferring motive or an overall position.
-import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=plain-language-votes-1";
+import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=compact-votes-1";
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
@@ -35,7 +35,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     const linkLabel = vote.chamber === "house" ? "House Clerk roll-call record" : "Senate.gov roll-call record (XML)";
     const link = sourceUrl ? '<a href="' + escapeHtml(sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + linkLabel + " ↗</a>" : "";
     const category = classifyVoteRecord(vote);
-    const categoryLabel = category === "procedural" ? "A vote about how Congress works" : category === "legislation" ? "A vote on bill text" : "We need more information";
+    const categoryLabel = category === "procedural" ? "Procedural action" : category === "legislation" ? "Bill or amendment vote" : "Action type not classified";
     const hasReviewedContext = vote.contextReviewed === true && vote.purpose && vote.effect;
     const proceduralGuide = !hasReviewedContext ? summarizeProceduralVote(vote) : null;
     const contextSources = hasReviewedContext && Array.isArray(vote.contextSources)
@@ -47,13 +47,12 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     const proceduralContext = proceduralGuide
       ? '<div class="vote-explanation"><p><strong>What it was for:</strong> ' + escapeHtml(proceduralGuide.purpose) + '</p><p><strong>What it would do:</strong> ' + escapeHtml(proceduralGuide.effect) + '</p><p class="vote-source-note">General Senate procedure, not a summary of the underlying bill. <a href="' + escapeHtml(proceduralGuide.sourceUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(proceduralGuide.sourceTitle) + ' ↗</a></p></div>'
       : "";
-    const context = reviewedContext || proceduralContext || '<p class="vote-context-pending">We have not yet checked what this vote would do. Read the official question and source before drawing a conclusion.</p>';
+    const context = reviewedContext || proceduralContext || '<p class="vote-context-pending">Plain-language purpose and effect have not been reviewed for this roll call. The official question and linked measure are provided so you can check the source.</p>';
     const question = escapeHtml(vote.question || "Roll-call vote");
     const date = escapeHtml(formatVoteDate(vote.date));
     const recordedVote = escapeHtml(vote.vote || "Not reported");
-    const shortVote = escapeHtml(({ Yea: "Voted yes", Nay: "Voted no", Aye: "Voted yes", No: "Voted no", "Not Voting": "Did not vote" })[vote.vote] || vote.vote || "Not reported");
     const result = escapeHtml(vote.result || "Not reported");
-    return '<details class="vote-record"><summary><span class="vote-row-meta">' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</span><span class="vote-row-question">' + question + '</span><span class="vote-row-choice">' + shortVote + '</span></summary><div class="vote-detail"><p class="vote-meta">' + escapeHtml(categoryLabel) + ' · ' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</p><h6>' + question + '</h6>' + context + '<p class="vote-outcome"><strong>Recorded vote:</strong> ' + recordedVote + ' <span>· Question result: ' + result + '</span></p>' + (vote.billUrl && /^https:\/\/www\.congress\.gov\//.test(vote.billUrl) ? '<p><a href="' + escapeHtml(vote.billUrl) + '" target="_blank" rel="noopener noreferrer">Related measure on Congress.gov ↗</a></p>' : "") + link + '</div></details>';
+    return '<details class="vote-record"><summary><span class="vote-row-meta">' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</span><span class="vote-row-question">' + question + '</span><span class="vote-row-choice">' + recordedVote + '</span></summary><div class="vote-detail"><p class="vote-meta">' + escapeHtml(categoryLabel) + ' · ' + date + ' · ' + escapeHtml(vote.memberOffice || vote.chamber) + '</p><h6>' + question + '</h6>' + context + '<p class="vote-outcome"><strong>Recorded vote:</strong> ' + recordedVote + ' <span>· Question result: ' + result + '</span></p>' + (vote.billUrl && /^https:\/\/www\.congress\.gov\//.test(vote.billUrl) ? '<p><a href="' + escapeHtml(vote.billUrl) + '" target="_blank" rel="noopener noreferrer">Related measure on Congress.gov ↗</a></p>' : "") + link + '</div></details>';
   }
 
   async function openVotePanel(details, candidateName) {
@@ -65,7 +64,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     try {
       const allVotes = await loadVotes();
       const records = allVotes.filter(vote => vote.candidate === candidateName);
-      summary.textContent = "Recorded votes (" + records.length + ")";
+      summary.textContent = "Official voting record (" + records.length + ")";
       details.dataset.loaded = "true";
       const search = details.querySelector(".vote-search");
       const choice = details.querySelector(".vote-choice");
@@ -108,7 +107,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       const panel = document.createElement("details");
       panel.className = "candidate-evidence";
       const title = document.createElement("summary");
-      title.textContent = "Candidate details, votes & sources";
+      title.textContent = "Candidate research — summaries, votes & sources";
       panel.appendChild(title);
       const content = document.createElement("div");
       content.className = "evidence-candidates";
@@ -122,7 +121,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
         records.className = "official-votes";
         records.addEventListener("toggle", () => { if (records.open) openVotePanel(records, name); });
         const recordsTitle = document.createElement("summary");
-        recordsTitle.textContent = "Recorded votes — open to load";
+        recordsTitle.textContent = "Official voting record — open to load";
         records.appendChild(recordsTitle);
         const controls = document.createElement("div");
         controls.className = "vote-controls";
@@ -131,10 +130,10 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
         const search = document.createElement("input");
         search.type = "search";
         search.className = "vote-search";
-        search.placeholder = "Search a bill, date, or result";
+        search.placeholder = "Question, date, or result";
         searchLabel.appendChild(search);
         const choiceLabel = document.createElement("label");
-        choiceLabel.textContent = "Filter by the candidate’s vote";
+        choiceLabel.textContent = "Filter by recorded vote";
         const choice = document.createElement("select");
         choice.className = "vote-choice";
         const all = document.createElement("option");

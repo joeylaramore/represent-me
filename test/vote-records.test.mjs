@@ -62,7 +62,7 @@ test("explicit reviewed category takes precedence and groups records separately"
 test("vote cards require reviewed purpose and effect and disclose missing context", () => {
   const source = readFileSync(new URL("../evidence.js", import.meta.url), "utf8");
   assert.match(source, /vote\.contextReviewed === true && vote\.purpose && vote\.effect/);
-  assert.match(source, /Plain-language purpose and effect have not been reviewed/);
+  assert.match(source, /We have not yet checked what this vote would do/);
   assert.match(source, /groupVoteRecords\(visible\)/);
 });
 
