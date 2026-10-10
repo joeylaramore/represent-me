@@ -26,6 +26,31 @@ export function classifyVoteRecord(vote) {
   return "unclassified";
 }
 
+export function summarizeProceduralVote(vote) {
+  if (vote.chamber !== "senate" || classifyVoteRecord(vote) !== "procedural") return null;
+  const question = String(vote.question || "").toLocaleLowerCase();
+  if (/cloture/.test(question)) {
+    const onProceed = /motion to proceed/.test(question);
+    return {
+      purpose: onProceed
+        ? "Whether to limit debate on the motion to bring the named measure up for Senate consideration."
+        : "Whether to limit debate on the pending Senate matter named in the roll-call question.",
+      effect: onProceed
+        ? "If agreed to, cloture limits further debate on the motion to proceed so the Senate can move to the next step. It does not itself bring the bill up or pass it."
+        : "If agreed to, cloture limits further debate on the pending matter so the Senate can move toward a vote. It does not itself pass a bill or confirm a nominee.",
+      sourceTitle: "U.S. Senate glossary: cloture and motion to proceed",
+      sourceUrl: "https://www.senate.gov/about/research-tools/glossary.htm"
+    };
+  }
+  if (/motion to proceed/.test(question)) return {
+    purpose: "Whether the Senate should bring the named measure up for floor consideration.",
+    effect: "If agreed to, the Senate can begin considering the measure, including debate and votes. This procedural vote does not pass the measure.",
+    sourceTitle: "U.S. Senate glossary: motion to proceed",
+    sourceUrl: "https://www.senate.gov/about/research-tools/glossary.htm"
+  };
+  return null;
+}
+
 export function groupVoteRecords(votes) {
   const groups = [
     { id: "procedural", title: "Procedural votes", description: "Votes about how the chamber handles legislation, such as whether to begin debate or end debate.", records: [] },

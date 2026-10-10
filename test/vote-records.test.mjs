@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { classifyVoteRecord, filterVoteRecords, formatVoteDate, groupVoteRecords, officialVoteUrl } from "../vote-records.mjs";
+import { classifyVoteRecord, filterVoteRecords, formatVoteDate, groupVoteRecords, officialVoteUrl, summarizeProceduralVote } from "../vote-records.mjs";
 
 const house = {
   chamber: "house", date: "2025-01-14T14:28:00-05:00",
@@ -62,4 +62,14 @@ test("vote cards require reviewed purpose and effect and disclose missing contex
   assert.match(source, /vote\.contextReviewed === true && vote\.purpose && vote\.effect/);
   assert.match(source, /Plain-language purpose and effect have not been reviewed/);
   assert.match(source, /groupVoteRecords\(visible\)/);
+});
+
+test("Senate procedural summaries explain cloture and motion to proceed without treating them as law passage", () => {
+  const cloture = summarizeProceduralVote({ chamber: "senate", question: "On Cloture on the Motion to Proceed H.R. 9340" });
+  assert.match(cloture.purpose, /bring the named measure up/);
+  assert.match(cloture.effect, /does not itself bring the bill up or pass it/);
+  assert.equal(cloture.sourceUrl, "https://www.senate.gov/about/research-tools/glossary.htm");
+  const proceed = summarizeProceduralVote({ chamber: "senate", question: "On the Motion to Proceed S.J.Res. 197" });
+  assert.match(proceed.effect, /does not pass the measure/);
+  assert.equal(summarizeProceduralVote({ chamber: "senate", question: "On Passage of the Bill S. 4668" }), null);
 });
