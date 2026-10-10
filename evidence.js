@@ -1,5 +1,5 @@
 // Official vote rows are shown as recorded, without inferring motive or an overall position.
-import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=vote-groups-1";
+import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProceduralVote, officialVoteUrl, formatVoteDate } from "./vote-records.mjs?v=compact-votes-1";
 
 (async () => {
   const root = document.getElementById("preliminary-ballot");
