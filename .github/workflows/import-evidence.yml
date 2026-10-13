@@ -21,6 +21,18 @@ jobs:
         env:
           CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
       - run: npm test && npm run validate:evidence && npm run validate:imports
+      - name: Audit imported candidate records
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const targets=JSON.parse(fs.readFileSync('data/import-targets.json','utf8'));
+          const inbox=JSON.parse(fs.readFileSync('data/imported-evidence-2026.json','utf8'));
+          const votes=inbox.votes||[];
+          const lines=['## Daily evidence import audit',`Target candidates: ${targets.candidates.length}`,`Stored votes: ${votes.length}`,`House votes: ${votes.filter(v=>v.chamber==='house').length}`,`Senate votes: ${votes.filter(v=>v.chamber==='senate').length}`,`Position snapshots: ${(inbox.positionSources||[]).length}`,...targets.candidates.map(c=>`${c.name}: ${votes.filter(v=>v.candidate===c.name).length} votes`)];
+          console.log(lines.join('\n'));
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n\n')+'\n');
+          if(votes.length===0){console.error('No candidate-specific votes stored despite configured targets. Check House member API parsing and candidate identifiers.');process.exitCode=1;}
+          NODE
       - name: Open review PR for new source material
         if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v7
