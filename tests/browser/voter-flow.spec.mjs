@@ -13,8 +13,10 @@ test('a voter can find official ballot help without reading the research section
   await page.goto('/');
   await page.locator('#location-tools').scrollIntoViewIfNeeded();
   await expect(page.locator('#location-tools')).toBeInViewport();
-  await expect(page.getByRole('link',{name:'See my official ballot'})).toBeVisible();
-  await expect(page.getByRole('link',{name:'Check my polling place'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
+  await expect(page.getByLabel('Street address or ZIP code')).toBeVisible();
+  await expect(page.getByRole('button',{name:/Open my ballot/})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Open official Georgia ballot'})).toBeVisible();
 });
 
 test('a voter can open the candidate guide and see loaded races',async({page})=>{

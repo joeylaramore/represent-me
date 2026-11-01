@@ -1,8 +1,11 @@
-// No address storage, geocoding, or requests containing user-entered location.
+// Location is used only to guide the voter to Georgia's official personalized ballot.
 (()=>{
- const form=document.getElementById('location-form');const address=document.getElementById('voting-address');const status=document.getElementById('location-status');
- form.addEventListener('submit',e=>{e.preventDefault();const value=address.value.trim();status.textContent=value?'For your privacy, the address you typed is not sent or saved here. Enter it directly in Georgia My Voter Page to see your certified ballot and polling place.':'Use Georgia My Voter Page to verify your official ballot and polling place.';address.value='';window.open('https://mvp.sos.ga.gov/','_blank','noopener,noreferrer')});
- document.getElementById('clear-location').addEventListener('click',()=>{address.value='';status.textContent='Location entry cleared. No address was saved.'});
+ const form=document.getElementById('location-form');const address=document.getElementById('voting-address');const status=document.getElementById('location-status');const useLocation=document.getElementById('use-location');
+ const officialUrl='https://mvp.sos.ga.gov/';
+ const openOfficial=message=>{status.textContent=message;window.open(officialUrl,'_blank','noopener,noreferrer')};
+ form.addEventListener('submit',e=>{e.preventDefault();const value=address.value.trim();if(!value){status.textContent='Enter an address or ZIP code, or use your location.';address.focus();return}openOfficial('Opening Georgia’s official ballot lookup. Your address was not saved here.');address.value=''});
+ useLocation.addEventListener('click',()=>{if(!navigator.geolocation){status.textContent='Location sharing is not available. Enter your address or ZIP code.';address.focus();return}status.textContent='Requesting your location…';navigator.geolocation.getCurrentPosition(()=>openOfficial('Location found for this session. Confirm your address on Georgia’s official site.'),()=>{status.textContent='Location was not shared. Enter your address or ZIP code instead.';address.focus()},{enableHighAccuracy:false,maximumAge:300000,timeout:8000})});
+ document.getElementById('clear-location').addEventListener('click',()=>{address.value='';status.textContent='Location entry cleared. Nothing was saved.'});
  const root=document.getElementById('explore-results'),filter=document.getElementById('explore-scope'),search=document.getElementById('explore-search');
  const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&quot;',"'":'&#39;'}[c]));
  fetch('data/ballot-2026.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('unavailable');return r.json()}).then(data=>{
