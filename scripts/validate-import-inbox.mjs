@@ -17,6 +17,10 @@ for(const [i,row] of (inbox.votes||[]).entries()){
  try{const u=new URL(row.sourceUrl);if(u.protocol!=='https:'||!['api.congress.gov','www.senate.gov','clerk.house.gov'].includes(u.hostname))errors.push(`${at}: source must be an official HTTPS vote record`)}catch{errors.push(`${at}: valid source URL required`)}
  if(row.memberSourceUrl){try{const u=new URL(row.memberSourceUrl);if(u.protocol!=='https:'||u.hostname!=='clerk.house.gov')errors.push(`${at}: House member source must be an official HTTPS House Clerk URL`)}catch{errors.push(`${at}: valid House member source URL required`)}}
 }
+for(const [i,target] of targets.candidates.entries()){
+ const expected=target.chamber==='house'?'U.S. House':target.chamber==='senate'?'U.S. Senate':'';
+ if(expected&&!String(target.office||'').startsWith(expected))errors.push(`targets.candidates[${i}]: ${target.chamber} target office must start with ${expected}`);
+}
 for(const [i,row] of (inbox.positionSources||[]).entries()){
  const at=`positionSources[${i}]`;if(!names.has(row.candidate))errors.push(`${at}: candidate is not configured`);
  if(!row.contentSha256||!/^[a-f0-9]{64}$/.test(row.contentSha256))errors.push(`${at}: SHA-256 required`);

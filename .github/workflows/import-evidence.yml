@@ -1,5 +1,13 @@
 name: Import official votes and candidate position sources
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/import-targets.json'
+      - 'data/imported-evidence-2026.json'
+      - 'scripts/import-evidence.mjs'
+      - 'scripts/validate-import-inbox.mjs'
+      - '.github/workflows/import-evidence.yml'
   schedule:
     - cron: '0 13 * * *'
   workflow_dispatch:

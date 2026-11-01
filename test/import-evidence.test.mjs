@@ -49,7 +49,7 @@ test('daily importer fails clearly when the Congress.gov credential is absent',a
  await assert.rejects(runImport({apiKey:''}),/Set CONGRESS_API_KEY/);
 });
 
-test('transient Senate access denial is retried before failing the import',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;return calls===1?new Response('denied',{status:403,statusText:'Forbidden'}):new Response('<votes/>',{status:200})};try{const response=await request('https://www.senate.gov/example.xml');assert.equal(response.status,200);assert.equal(calls,2)}finally{globalThis.fetch=original}});
+test('transient Senate access failure is retried before failing the import',async()=>{const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;return calls===1?new Response('busy',{status:503,statusText:'Service Unavailable'}):new Response('<votes/>',{status:200})};try{const response=await request('https://www.senate.gov/example.xml');assert.equal(response.status,200);assert.equal(calls,2)}finally{globalThis.fetch=original}});
 
 test('Senate refresh keeps the existing inbox when the official index is unavailable',async()=>{const original=globalThis.fetch;globalThis.fetch=async()=>new Response('denied',{status:403,statusText:'Forbidden'});try{const rows=await fetchSenateVotes([{name:'Jon Ossoff',office:'U.S. Senate',chamber:'senate',senateName:'Ossoff',state:'GA'}],[],119,2);assert.deepEqual(rows,[])}finally{globalThis.fetch=original}});
 
