@@ -8,9 +8,11 @@
  const progressTotal=document.getElementById('ballot-progress-total');
  const mobileCount=document.getElementById('mobile-ballot-count');
  const preview=document.getElementById('ballot-preview-content');const locationLabel=document.getElementById('location-label');
- const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v2')==='true'}catch{return false}};
- const enablePreview=()=>{preview.hidden=false;document.getElementById('ballot-mobile-bar').hidden=false;if(locationLabel)locationLabel.textContent='Location set'};
+ const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v3')==='true'&&localStorage.getItem('represent-me-location-state-v3')==='GA'}catch{return false}};
+ const enablePreview=()=>{if(!locationReady())return;preview.hidden=false;document.getElementById('ballot-mobile-bar').hidden=false;if(locationLabel)locationLabel.textContent='Georgia selected'};
+ const disablePreview=()=>{preview.hidden=true;document.getElementById('ballot-mobile-bar').hidden=true;if(locationLabel)locationLabel.textContent='Location not set'};
  window.addEventListener('represent-me-location-ready',enablePreview);if(locationReady())enablePreview();
+ window.addEventListener('location-cleared',disablePreview);
  const updateStatus=()=>{const count=selections.size;status.textContent='Choices are temporary and never saved.';progress.textContent=count+' race'+(count===1?'':'s')+' selected';mobileCount.textContent=count+' selected'};
  try{
   const response=await fetch('data/ballot-2026.json',{cache:'no-store'});if(!response.ok)throw Error('Ballot preview unavailable');
@@ -24,10 +26,10 @@
    const old=document.getElementById('private-print-sheet');if(old)old.remove();
    const sheet=document.createElement('section');sheet.id='private-print-sheet';sheet.setAttribute('aria-label','Private voting-day reference');
    const heading=document.createElement('h1');heading.textContent='My voting-day reference';sheet.appendChild(heading);
-   const note=document.createElement('p');note.textContent='November 3, 2026 · Personal reference only. NOT an official ballot. Verify your exact ballot at mvp.sos.ga.gov. Choices are not saved or sent by this page.';sheet.appendChild(note);
+   const note=document.createElement('p');note.textContent='November 3, 2026 · Personal reference only. NOT an official ballot. Verify your exact ballot with the official election office. Choices are not saved or sent by this page.';sheet.appendChild(note);
    for(const scope of groups){const group=document.createElement('section');group.className='print-ballot-group';const groupHeading=document.createElement('h2');groupHeading.textContent=scope;group.appendChild(groupHeading);for(const [index,contest] of data.contests.map((item,itemIndex)=>[itemIndex,item]).filter(([,item])=>item.scope===scope)){const race=document.createElement('div');race.className='print-ballot-race';const title=document.createElement('h3');title.textContent=contest.office;race.appendChild(title);const instruction=document.createElement('small');instruction.textContent='Vote for one';race.appendChild(instruction);for(const [candidateIndex,candidate] of contest.candidates.entries()){const option=document.createElement('p');option.className='print-ballot-option';option.textContent=(selections.get(index)===candidateIndex?'☒ ':'☐ ')+candidate.name+' ('+candidate.party+')';race.appendChild(option)}group.appendChild(race)}sheet.appendChild(group)}
    document.body.appendChild(sheet);window.print();
    const cleanup=()=>{sheet.remove();window.removeEventListener('afterprint',cleanup)};window.addEventListener('afterprint',cleanup,{once:true});
   });
- }catch(error){root.textContent='The preliminary ballot could not be loaded. Use Georgia My Voter Page for your official ballot.';document.getElementById('print-ballot').disabled=true}
+ }catch(error){root.textContent='The preliminary ballot could not be loaded. Use your state election office for your official ballot.';document.getElementById('print-ballot').disabled=true}
 })();

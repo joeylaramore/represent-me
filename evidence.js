@@ -131,10 +131,19 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
 
   function renderRepresentativeProfiles() {
     if (!representativeRoot || representativeRoot.dataset.ready === "true") return;
+    let selectedState = "";
+    try { selectedState = localStorage.getItem("represent-me-location-state-v3") || ""; } catch {}
+    if (selectedState !== "GA") {
+      representativeRoot.replaceChildren();
+      const message = document.createElement("p");
+      message.textContent = selectedState ? "Representative research is currently available for Georgia only." : "Choose your state first to load representatives.";
+      representativeRoot.appendChild(message);
+      return;
+    }
     const profiles = [
-      { name: "Jon Ossoff", office: "U.S. Senator for Georgia", url: "https://www.ossoff.senate.gov/", summary: "He publicly supported a $35 monthly cap for covered Medicare insulin, investigated housing investors, and examined Georgia foster-care safety. The sources document those actions, not whether they solved the broader problems." },
-      { name: "Raphael Warnock", office: "U.S. Senator for Georgia", url: "https://www.warnock.senate.gov/" },
-      { name: "Brian Jack", office: "U.S. Representative · Georgia District 3", url: "https://jack.house.gov/" }
+      { name: "Jon Ossoff", office: "U.S. Senator for Georgia", url: "https://www.ossoff.senate.gov/", birthDate: "1987-02-16", summary: "He publicly supported a $35 monthly cap for covered Medicare insulin, investigated housing investors, and examined Georgia foster-care safety. The sources document those actions, not whether they solved the broader problems." },
+      { name: "Raphael Warnock", office: "U.S. Senator for Georgia", url: "https://www.warnock.senate.gov/", birthDate: "1969-07-23" },
+      { name: "Brian Jack", office: "U.S. Representative · Georgia District 3", url: "https://jack.house.gov/", birthDate: "1988-02-17" }
     ];
     representativeRoot.replaceChildren();
     for (const profile of profiles) {
@@ -142,6 +151,14 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       const card = document.createElement("article"); card.className = "representative-card";
       const office = document.createElement("p"); office.className = "representative-office"; office.textContent = profile.office;
       const name = document.createElement("h3"); name.textContent = profile.name;
+      if (profile.birthDate) {
+        const age = document.createElement("p"); age.className = "representative-age";
+        const birth = new Date(profile.birthDate + "T00:00:00"); const today = new Date();
+        let years = today.getFullYear() - birth.getFullYear();
+        if (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate())) years--;
+        age.textContent = "Age " + years;
+        card.appendChild(age);
+      }
       const intro = document.createElement("p"); intro.className = "representative-summary";
       intro.textContent = profile.summary || "A checked summary is not ready yet. We are still reviewing sources; missing information does not mean there is no record.";
       const link = document.createElement("a"); link.className = "representative-official-link"; link.href = profile.url; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Official profile ↗";
@@ -197,6 +214,8 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
   }
 
   renderRepresentativeProfiles();
+  window.addEventListener("represent-me-location-ready", renderRepresentativeProfiles);
+  window.addEventListener("location-cleared", () => { representativeRoot.dataset.ready = ""; renderRepresentativeProfiles(); });
 
   new MutationObserver(() => {
     if (root.querySelector(".ballot-row:not(:has(.candidate-evidence))")) enhance();

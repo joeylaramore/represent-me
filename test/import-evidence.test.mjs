@@ -40,6 +40,11 @@ test('configured import positions are HTTPS first-party source pages',()=>{
  for(const candidate of targets.candidates)for(const source of candidate.positionSources){assert.equal(new URL(source).protocol,'https:');assert.ok(source.startsWith('https://'))}
 });
 
+test('configured House targets use House offices',()=>{
+ const targets=JSON.parse(fs.readFileSync('data/import-targets.json','utf8'));
+ for(const candidate of targets.candidates.filter(candidate=>candidate.chamber==='house'))assert.match(candidate.office,/^U\.S\. House/);
+});
+
 test('daily importer fails clearly when the Congress.gov credential is absent',async()=>{
  await assert.rejects(runImport({apiKey:''}),/Set CONGRESS_API_KEY/);
 });

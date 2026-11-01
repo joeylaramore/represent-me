@@ -19,10 +19,11 @@ test('a voter can find official ballot help without reading the research section
   await page.locator('#location-tools').scrollIntoViewIfNeeded();
   await expect(page.locator('#location-tools')).toBeInViewport();
   await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
-  await expect(page.getByLabel('Address or ZIP code')).toBeVisible();
+  await page.locator('#voting-state').selectOption('GA');
+  await expect(page.getByLabel('Address or ZIP code',{exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:/Continue/})).toBeVisible();
   await expect(page.getByRole('link',{name:'Check my registration'})).toBeVisible();
-  await page.getByLabel('Address or ZIP code').fill('123 Main Street, Newnan, GA 30263');
+  await page.getByLabel('Address or ZIP code',{exact:true}).fill('123 Main Street, Newnan, GA 30263');
   const popupPromise=page.waitForEvent('popup');
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
@@ -32,11 +33,21 @@ test('a voter can find official ballot help without reading the research section
 
 test('a voter can open the candidate guide and see loaded races',async({page})=>{
   await openFresh(page);
-  await page.evaluate(()=>localStorage.setItem('represent-me-location-ready-v2','true'));
+  await page.evaluate(()=>{localStorage.setItem('represent-me-location-ready-v3','true');localStorage.setItem('represent-me-location-state-v3','GA')});
   await page.reload();
   await expect(page.locator('#contests')).toBeVisible();
   await expect(page.locator('#preliminary-ballot')).not.toContainText('Loading candidate roster');
   await expect(page.locator('#preliminary-ballot')).toContainText('Georgia');
+});
+
+test('a non-Georgia selection never shows the Georgia ballot preview',async({page})=>{
+  await openFresh(page);
+  await page.locator('#voting-state').selectOption('OH');
+  await page.getByLabel('Address or ZIP code',{exact:true}).fill('43215');
+  await page.getByRole('button',{name:/Continue/}).click();
+  await expect(page.locator('#ballot-preview-content')).toBeHidden();
+  await expect(page.locator('#explore-results')).toContainText('Ohio');
+  await expect(page.locator('#representative-list')).toContainText('Georgia only');
 });
 
 test('privacy information is easy to find',async({page})=>{
