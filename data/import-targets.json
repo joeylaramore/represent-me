@@ -21,6 +21,16 @@
       "positionSources": ["https://mikecollinsga.com/issues/"]
     },
     {
+      "name": "Raphael Warnock",
+      "office": "U.S. Senate",
+      "chamber": "senate",
+      "bioguideId": "W000790",
+      "senateName": "Warnock",
+      "state": "GA",
+      "memberOffice": "U.S. Senate · Georgia",
+      "positionSources": ["https://www.warnock.senate.gov/"]
+    },
+    {
       "name": "Brian Jack",
       "office": "U.S. House · District 3",
       "chamber": "house",
