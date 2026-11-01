@@ -47761,8 +47761,8 @@
       "title": "About Jon - Jon Ossoff for U.S. Senate",
       "description": "Senator Jon Ossoff is MAGA’s #1 target in 2026. Donate now to his re-election campaign and help him fight back.",
       "url": "https://electjon.com/bio/",
-      "contentSha256": "5dacc440ab59475e4eb365284fc81eceb9195088f64ce781a4996ef244b1819d",
-      "changedAt": "2026-11-01T14:19:21.404Z",
+      "contentSha256": "f79ecae422a730648850e7318164a6f5318a8967bbd9bd3d942398d820e7d3d2",
+      "changedAt": "2026-11-01T18:19:51.318Z",
       "status": "first-party-source-needs-human-review"
     },
     {
@@ -47771,9 +47771,10 @@
       "title": "Issues &#8211; Mike Collins for Senate",
       "description": "Join the ride!",
       "url": "https://mikecollinsga.com/",
-      "contentSha256": "941ab72e1342f492c4982873eb56adcad8e93b8a47337ee41f6ff46a2666f0c0",
-      "changedAt": "2026-11-01T14:19:21.568Z",
+      "contentSha256": "1193b2eb5c3be9f8b3565b939f9a337a1dc112208202f7eea2722325872f1189",
+      "changedAt": "2026-11-01T18:19:51.571Z",
       "status": "first-party-source-needs-human-review"
     }
-  ]
+  ],
+  "newsLeads": []
 }
