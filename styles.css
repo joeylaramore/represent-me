@@ -98,10 +98,15 @@
 #location-tools button{min-height:52px;font-size:16px}
 #location-tools .source-note{font-size:15px;padding-top:12px;margin-bottom:0}
 #location-tools .location-links{display:none}
+#location-tools .location-help{display:none}
 #location-tools .location-help[open] .location-links{display:flex}
 .location-help{margin-top:10px}.location-help summary{color:var(--green);font-weight:700;cursor:pointer;min-height:44px;padding:10px 0}.location-help .location-links{margin-top:0}
 #location-tools #clear-location{display:none}
-body.location-ready #location-tools #clear-location{display:inline-block}
+#location-tools #change-location{display:none}
+body.location-ready #location-tools #location-form{display:none}
+body.location-ready #location-tools .location-help{display:block}
+body.location-ready #location-tools #change-location{display:inline-block}
+#contests{padding-top:24px}
 .notice{font-size:15px;min-height:56px;padding-top:10px;padding-bottom:10px}
 .notice a{font-size:15px}
 #contests .ballot-progress{display:none}
