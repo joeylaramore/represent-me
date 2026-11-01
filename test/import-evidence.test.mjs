@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress,runImport,request,fetchFirstPartyResponse,fetchSenateVotes,parseSenateMirrorVotes} from '../scripts/import-evidence.mjs';
+import {textOf,parseSenateVoteXml,parseHouseClerkVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress,runImport,request,fetchFirstPartyResponse,fetchSenateVotes,parseSenateMirrorVotes} from '../scripts/import-evidence.mjs';
 
 test('Senate vote records retain the official roll call, date, question, source, and member vote',()=>{
  const xml=`<roll_call_vote><congress>119</congress><session>2</session><vote_number>42</vote_number><vote_date>June 3, 2026, 2:01 PM</vote_date><vote_question_text><![CDATA[On Passage of the Bill]]></vote_question_text><vote_result_text>Bill Passed (51-49)</vote_result_text><members><member><last_name>Ossoff</last_name><state>GA</state><vote_cast>Nay</vote_cast></member></members></roll_call_vote>`;
@@ -20,6 +20,11 @@ test('House member rows parse official results arrays and legacy item wrappers',
  const legacy=extractHouseEntries({houseRollCallVoteMemberVotes:{results:{item:[{bioguideId:'J000311',voteCast:'Aye'}]}}});
  assert.equal(official[0].bioguideID,'J000311');assert.equal(legacy[0].bioguideId,'J000311');
  assert.deepEqual(mergeRows([{id:'a'},{id:'b'}],[{id:'b',vote:'Nay'},{id:'c'}],x=>x.id),[{id:'a'},{id:'b',vote:'Nay'},{id:'c'}]);
+});
+
+test('House Clerk XML fallback preserves Bioguide IDs and recorded votes',()=>{
+ const vote=parseHouseClerkVoteXml('<rollcall-vote><vote-metadata><action-date>1-Nov-2026</action-date><vote-question>On Passage</vote-question><vote-result>Passed</vote-result></vote-metadata><vote-data><recorded-vote><legislator name-id="J000311">Jack</legislator><vote>Aye</vote></recorded-vote></vote-data></rollcall-vote>',{sourceUrl:'https://clerk.house.gov/evs/2026/roll001.xml'});
+ assert.equal(vote.members[0].bioguideId,'J000311');assert.equal(vote.members[0].voteCast,'Aye');assert.equal(vote.question,'On Passage');
 });
 
 test('current Congress and session calculation follows the two-year congressional cycle',()=>{
@@ -44,6 +49,8 @@ test('transient Senate access denial is retried before failing the import',async
 test('Senate refresh keeps the existing inbox when the official index is unavailable',async()=>{const original=globalThis.fetch;globalThis.fetch=async()=>new Response('denied',{status:403,statusText:'Forbidden'});try{const rows=await fetchSenateVotes([{name:'Jon Ossoff',office:'U.S. Senate',chamber:'senate',senateName:'Ossoff',state:'GA'}],[],119,2);assert.deepEqual(rows,[])}finally{globalThis.fetch=original}});
 
 test('Senate mirror rows preserve official source links and member votes',()=>{const rows=parseSenateMirrorVotes({votes:{S119_2_00042:{date:'2026-06-03',motionText:'On Passage of the Bill',resultText:'Bill Passed',billUrl:'https://www.congress.gov/bill/119th-congress/senate-bill/1'}},memberVotes:{O000174:[{voteId:'S119_2_00042',vote:'Nay'}]}},[{name:'Jon Ossoff',office:'U.S. Senate',chamber:'senate',bioguideId:'O000174',memberOffice:'U.S. Senate · Georgia'}],[],119,2);assert.equal(rows[0].vote,'Nay');assert.equal(rows[0].sourceUrl,'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00042.xml');assert.equal(rows[0].retrievedVia,'VoteGA mirror of official Senate roll-call XML')});
+
+test('Senate mirror fallback does not send the Senate.gov referrer to GitHub',async()=>{const original=globalThis.fetch;const requests=[];globalThis.fetch=async(url,options)=>{requests.push({url:String(url),options});return String(url).includes('senate.gov')?new Response('denied',{status:403,statusText:'Forbidden'}):new Response(JSON.stringify({votes:{},memberVotes:{}}),{status:200,headers:{'content-type':'application/json'}})};try{await fetchSenateVotes([{name:'Jon Ossoff',office:'U.S. Senate',chamber:'senate',senateName:'Ossoff',state:'GA',bioguideId:'O000174'}],[],119,2);const mirror=requests.find(item=>item.url.includes('raw.githubusercontent.com'));assert.ok(mirror);assert.equal(mirror.options.headers.referer,undefined)}finally{globalThis.fetch=original}});
 
 test('position fetch stops before following a redirect to another host',async()=>{
  const original=globalThis.fetch;const requests=[];

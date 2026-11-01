@@ -14,7 +14,8 @@ for(const [i,row] of (inbox.votes||[]).entries()){
   if(!Array.isArray(row.contextSources)||!row.contextSources.length)errors.push(`${at}: reviewed context requires citation sources`);
   for(const [j,source] of (row.contextSources||[]).entries()){try{if(!source||typeof source.title!=='string'||!source.title.trim())throw new Error();const u=new URL(source.url);if(u.protocol!=='https:')errors.push(`${at}.contextSources[${j}]: HTTPS URL required`)}catch{errors.push(`${at}.contextSources[${j}]: title and valid HTTPS citation URL required`)}}
  }
- try{const u=new URL(row.sourceUrl);if(u.protocol!=='https:'||!['api.congress.gov','www.senate.gov'].includes(u.hostname))errors.push(`${at}: source must be an official HTTPS vote record`)}catch{errors.push(`${at}: valid source URL required`)}
+ try{const u=new URL(row.sourceUrl);if(u.protocol!=='https:'||!['api.congress.gov','www.senate.gov','clerk.house.gov'].includes(u.hostname))errors.push(`${at}: source must be an official HTTPS vote record`)}catch{errors.push(`${at}: valid source URL required`)}
+ if(row.memberSourceUrl){try{const u=new URL(row.memberSourceUrl);if(u.protocol!=='https:'||u.hostname!=='clerk.house.gov')errors.push(`${at}: House member source must be an official HTTPS House Clerk URL`)}catch{errors.push(`${at}: valid House member source URL required`)}}
 }
 for(const [i,row] of (inbox.positionSources||[]).entries()){
  const at=`positionSources[${i}]`;if(!names.has(row.candidate))errors.push(`${at}: candidate is not configured`);
