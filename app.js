@@ -1,6 +1,6 @@
 const electionDate=new Date('2026-11-03T00:00:00-05:00');
 const days=document.querySelector('[data-days]');
-function updateCountdown(){days.textContent=Math.max(0,Math.ceil((electionDate-new Date())/86400000)).toLocaleString()} updateCountdown();setInterval(updateCountdown,60000);
+function updateCountdown(){if(days)days.textContent=Math.max(0,Math.ceil((electionDate-new Date())/86400000)).toLocaleString()} updateCountdown();if(days)setInterval(updateCountdown,60000);
 const questions=[
  {topic:'Cost of living',text:'What should government do about high costs?',options:['Lower taxes and rules that raise costs','Target help to households under pressure','Increase supply and competition']},
  {topic:'Healthcare',text:'What should healthcare policy prioritize?',options:['Lower bills and prescription costs','Access for everyone who needs care','More choice, competition, and price transparency']},
