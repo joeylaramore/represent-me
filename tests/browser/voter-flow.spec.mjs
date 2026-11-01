@@ -5,6 +5,7 @@ test('the first screen opens directly to the ballot',async({page})=>{
   await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
   await expect(page.locator('#contests')).toBeVisible();
   await expect(page.getByRole('button',{name:/Print guide/}).first()).toBeVisible();
+  await expect(page.getByRole('link',{name:'Compare my choices with my views'})).toBeVisible();
   await expect(page.locator('#representatives')).toBeHidden();
   await expect(page.locator('#sources')).toBeHidden();
 });
