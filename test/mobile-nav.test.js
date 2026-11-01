@@ -6,7 +6,7 @@ test('mobile shortcuts are high contrast, larger, and deployed by the container'
 
 test('focused routes always hide unrelated styled sections',()=>assert.match(css,/\[hidden\]\{display:none!important\}/));
 
-test('initial route and browser history preserve the browser-restored scroll position',()=>{assert.match(js,/function setView\(view,\{push=false,scroll=push\}=\{\}\)/);assert.match(js,/if\(scroll\)window\.scrollTo/);assert.match(js,/setView\(view,\{scroll:false\}\)/);assert.match(js,/setView\(initial,\{scroll:false\}\)/);assert.match(js,/showHome\(\{scroll:false\}\)/)});
+test('main route starts at the top while research routes keep scroll state',()=>{assert.match(js,/function setView\(view,\{push=false,scroll=push\}=\{\}\)/);assert.match(js,/if\(scroll\)window\.scrollTo/);assert.match(js,/const mainView=!initial\|\|initial==='ballot'/);assert.match(js,/if\(mainView\)window\.scrollTo\(\{top:0,behavior:'instant'\}\)/);assert.match(js,/savedScroll=mainView\?null/);assert.match(js,/setView\(initial,\{scroll:false\}\)/);assert.match(js,/showHome\(\{scroll:false\}\)/)});
 
 test('refresh saves and restores scroll after page layout settles',()=>{assert.match(js,/sessionStorage\.setItem\(scrollPrefix\+location\.pathname\+location\.search/);assert.match(js,/history\.scrollRestoration='manual'/);assert.match(js,/window\.addEventListener\('load',restore/);assert.match(js,/performance\.now\(\)-started<1800/)});
 

@@ -24,8 +24,9 @@
  document.addEventListener('click',event=>{const link=event.target.closest('[data-view]');if(!link)return;event.preventDefault();setView(link.dataset.view,{push:true})});
  document.querySelector('.brand')?.addEventListener('click',event=>{if(document.body.dataset.mobileView){event.preventDefault();showHome({push:true})}});
  window.addEventListener('popstate',()=>{const view=new URL(location.href).searchParams.get('view');if(pages[view])setView(view,{scroll:false});else showHome({scroll:false})});
+ const initial=new URL(location.href).searchParams.get('view');const mainView=!initial||initial==='ballot';
  const scrollPrefix='represent-me-scroll:';
- const saveScroll=()=>{try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}};
+ const saveScroll=()=>{if(mainView)return;try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}};
  window.addEventListener('scroll',saveScroll,{passive:true});
  window.addEventListener('pagehide',saveScroll);
  function restoreSavedScroll(y){
@@ -35,10 +36,11 @@
   const restore=()=>{if(userMoved)return;window.scrollTo({top:y,behavior:'instant'});if(performance.now()-started<1800)requestAnimationFrame(restore);else ['wheel','touchstart','pointerdown','keydown'].forEach(type=>window.removeEventListener(type,stop))};
   requestAnimationFrame(restore);
  }
- const initial=new URL(location.href).searchParams.get('view');
- const savedScroll=sessionStorage.getItem(scrollPrefix+location.pathname+location.search);
+ const savedScroll=mainView?null:sessionStorage.getItem(scrollPrefix+location.pathname+location.search);
+ if(mainView){history.scrollRestoration='manual';window.scrollTo({top:0,behavior:'instant'})}
  if(pages[initial])setView(initial,{scroll:false});
  else setView('ballot',{scroll:false});
+ if(mainView)window.scrollTo({top:0,behavior:'instant'});
  if(savedScroll!==null&&Number.isFinite(Number(savedScroll))){
   history.scrollRestoration='manual';
   const restore=()=>restoreSavedScroll(Number(savedScroll));
