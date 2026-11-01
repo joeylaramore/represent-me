@@ -88,7 +88,7 @@ test('clearing location removes the visible location state',async({page})=>{
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
   await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
-  await page.getByRole('button',{name:'Change location',exact:true}).click();
+  await page.getByRole('button',{name:'Remove location',exact:true}).click();
   await expect(page.locator('#location-label')).toHaveText('Location not set');
   await expect(page.locator('#ballot-preview-content')).toBeHidden();
 });
