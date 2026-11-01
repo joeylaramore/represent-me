@@ -25,6 +25,7 @@ test('a voter can open the candidate guide and see loaded races',async({page})=>
   await expect(page.locator('#contests')).toBeVisible();
   await expect(page.locator('#preliminary-ballot')).not.toContainText('Loading candidate roster');
   await expect(page.locator('#preliminary-ballot')).toContainText('Georgia');
+  await expect(page.getByText('Candidate details, votes & sources').first()).toBeVisible();
 });
 
 test('privacy information is easy to find',async({page})=>{
