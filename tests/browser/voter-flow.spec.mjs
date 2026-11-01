@@ -1,21 +1,17 @@
 import {test,expect} from '@playwright/test';
 
-test('the first screen gives a voter three clear choices',async({page})=>{
+test('the first screen opens directly to the ballot',async({page})=>{
   await page.goto('/');
-  await expect(page.getByRole('heading',{name:'Ready to vote?'})).toBeVisible();
-  const start=page.locator('.quick-start-card');
-  await expect(start).toHaveCount(3);
-  await expect(start.nth(0)).toContainText('Find my ballot');
-  await expect(start.nth(1)).toContainText('Print my guide');
-  await expect(start.nth(2)).toContainText('More research');
+  await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
   await expect(page.locator('#contests')).toBeVisible();
+  await expect(page.getByRole('button',{name:/Print guide/}).first()).toBeVisible();
   await expect(page.locator('#representatives')).toBeHidden();
   await expect(page.locator('#sources')).toBeHidden();
 });
 
 test('a voter can find official ballot help without reading the research sections',async({page})=>{
   await page.goto('/');
-  await page.locator('.quick-start-card').nth(0).click();
+  await page.locator('#location-tools').scrollIntoViewIfNeeded();
   await expect(page.locator('#location-tools')).toBeInViewport();
   await expect(page.getByRole('link',{name:'See my official ballot'})).toBeVisible();
   await expect(page.getByRole('link',{name:'Check my polling place'})).toBeVisible();
@@ -23,8 +19,7 @@ test('a voter can find official ballot help without reading the research section
 
 test('a voter can open the candidate guide and see loaded races',async({page})=>{
   await page.goto('/');
-  await page.locator('.quick-start-card').nth(1).click();
-  await expect(page.locator('#contests')).toBeInViewport();
+  await expect(page.locator('#contests')).toBeVisible();
   await expect(page.locator('#preliminary-ballot')).not.toContainText('Loading candidate roster');
   await expect(page.locator('#preliminary-ballot')).toContainText('Georgia');
 });

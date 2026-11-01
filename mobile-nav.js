@@ -1,7 +1,7 @@
 (()=>{
  const nav=document.querySelector('.mobile-nav'),main=document.querySelector('main');if(!nav||!main)return;
  const pages={
-  ballot:['#election','.notice','#location-tools','#contests','#ballot-mobile-bar'],
+  ballot:['#election','.notice','#contests','#location-tools','#ballot-mobile-bar'],
   explore:['#explore','#vote-plan'],
   issues:['.questionnaire-promo','#beliefs','#value-match'],
   compare:['#representatives','#compare','#contests'],
