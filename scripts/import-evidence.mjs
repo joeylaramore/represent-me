@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const targetsPath=new URL('data/import-targets.json',root);
 const inboxPath=new URL('data/imported-evidence-2026.json',root);
+const ballotPath=new URL('data/ballot-2026.json',root);
 const apiRoot='https://api.congress.gov/v3';
 const houseClerkRoot='https://clerk.house.gov/evs';
 const senateRoot='https://www.senate.gov/legislative/LIS/roll_call_lists';
@@ -112,12 +113,46 @@ async function fetchPositions(targets,existing){
  for(const candidate of targets)for(const url of candidate.positionSources||[]){try{const fetched=await fetchFirstPartyResponse(url);if(fetched.redirected){console.warn(`Skipping position source redirect outside its first-party host for ${candidate.name}: ${new URL(url).hostname} -> ${fetched.targetHost}`);continue;}const html=await fetched.response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}catch(error){console.warn(`Position source unavailable for ${candidate.name} at ${url}: ${error.message}`)}}
  return rows;
 }
+
+const trustedNewsPublisher=/reuters|associated press|ap news|atlanta journal.?constitution|\bajc\b|wabe|georgia recorder|wsb|georgia public broadcasting|\bgpb\b|capitol beat|atlanta news first|11alive|fox 5 atlanta|npr|cnn|abc news|nbc news|cbs news|politico/i;
+function decodeXmlText(value=''){return value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&#x27;/g,"'").replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}
+function xmlTag(block,tag){const match=block.match(new RegExp('<'+tag+'\\b[^>]*>([\\s\\S]*?)<\\/'+tag+'\\s*>','i'));return match?decodeXmlText(match[1]):''}
+function mergeNewsLeads(existing,incoming){
+ const merged=mergeRows(existing,incoming,row=>row.candidate+'|'+row.url);
+ const groups=new Map();for(const row of merged){const rows=groups.get(row.candidate)||[];rows.push(row);groups.set(row.candidate,rows)}
+ return [...groups.values()].flatMap(rows=>rows.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).slice(0,12));
+}
+async function fetchNewsLeads(ballot,inbox){
+ const voted=new Set((inbox.votes||[]).map(row=>row.candidate));
+ const candidates=ballot.contests.flatMap(contest=>contest.candidates.map(candidate=>({name:candidate.name,office:contest.office}))).filter(candidate=>!voted.has(candidate.name));
+ const old=new Map((inbox.newsLeads||[]).map(row=>[row.candidate+'|'+row.url,row]));const rows=[];
+ for(let start=0;start<candidates.length;start+=4){
+  const batch=candidates.slice(start,start+4);
+  const results=await Promise.all(batch.map(async candidate=>{
+   try{
+    const query='"'+candidate.name+'" "'+candidate.office+'" Georgia (position OR issues OR says OR plan OR debate) after:2025-11-01';
+    const url=new URL('https://news.google.com/rss/search');url.searchParams.set('q',query);url.searchParams.set('hl','en-US');url.searchParams.set('gl','US');url.searchParams.set('ceid','US:en');
+    const xml=await fetchText(url.href,{headers:{'user-agent':headers['user-agent'],'accept':'application/rss+xml,application/xml,text/xml'}});
+    const items=[...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)].map(([,block])=>{
+     const title=xmlTag(block,'title');const link=xmlTag(block,'link');const sourceMatch=block.match(/<source\b[^>]*?url=["']([^"']+)["'][^>]*>([\s\S]*?)<\/source>/i);
+     const publisher=sourceMatch?decodeXmlText(sourceMatch[2]):'';const publisherUrl=sourceMatch?.[1]||'';
+     const dateText=xmlTag(block,'pubDate');const parsedDate=dateText?new Date(dateText):null;const date=parsedDate&&!Number.isNaN(parsedDate.valueOf())?parsedDate.toISOString().slice(0,10):'';
+     return {title,url:link,publisher,publisherUrl,date};
+    }).filter(item=>item.title&&item.publisher&&trustedNewsPublisher.test(item.publisher)&&/^https:\/\/news\.google\.com\//.test(item.url));
+    return items.slice(0,6).map(item=>({...item,candidate:candidate.name,office:candidate.office,aggregator:'Google News',status:'news-report-needs-human-review',retrievedAt:new Date().toISOString()}));
+   }catch(error){console.warn('Google News fallback unavailable for '+candidate.name+': '+error.message);return []}
+  }));
+  for(const items of results)for(const item of items){const prior=old.get(item.candidate+'|'+item.url);if(!prior||prior.title!==item.title||prior.publisher!==item.publisher||prior.date!==item.date)rows.push(item)}
+ }
+ return rows;
+}
+
 export {textOf,parseSenateVoteXml,parseHouseClerkVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress,fetchSenateVotes,parseSenateMirrorVotes};
 export async function runImport({targetsPathArg=targetsPath,inboxPathArg=inboxPath,apiKey=process.env.CONGRESS_API_KEY,now=new Date()}={}){
  if(!apiKey)throw new Error('Set CONGRESS_API_KEY to use the official Congress.gov House vote API.');
  const targets=JSON.parse(await fs.readFile(targetsPathArg,'utf8'));const inbox=JSON.parse(await fs.readFile(inboxPathArg,'utf8'));const {congress,session}=currentCongress(now);const votes=[];
  for(const s of new Set([session,session===1?2:1])){const year=(s===1?1789+2*(congress-1):1790+2*(congress-1));if(year>now.getUTCFullYear())continue;const house=await fetchHouseVotes(targets.candidates,inbox.votes.filter(v=>v.chamber==='house'),apiKey,congress,s);votes.push(...house.rows);console.log(`Congress.gov House ${congress}/${s}: ${JSON.stringify({...house.diagnostics,newVotes:house.rows.length})}`);votes.push(...await fetchSenateVotes(targets.candidates,inbox.votes.filter(v=>v.chamber==='senate'),congress,s));}
- const positions=await fetchPositions(targets.candidates,inbox.positionSources);const merged={...inbox,votes:mergeVoteRows(inbox.votes,votes),positionSources:mergeRows(inbox.positionSources,positions,x=>x.candidate+'|'+x.url)};
- await fs.writeFile(inboxPathArg,JSON.stringify(merged,null,2)+'\n');return {newVotes:votes.length,newPositionSnapshots:positions.length};
+ const ballot=JSON.parse(await fs.readFile(ballotPath,'utf8'));const positions=await fetchPositions(targets.candidates,inbox.positionSources);const newsLeads=await fetchNewsLeads(ballot,inbox);const merged={...inbox,votes:mergeVoteRows(inbox.votes,votes),positionSources:mergeRows(inbox.positionSources,positions,x=>x.candidate+'|'+x.url),newsLeads:mergeNewsLeads(inbox.newsLeads||[],newsLeads)};
+ await fs.writeFile(inboxPathArg,JSON.stringify(merged,null,2)+'\n');return {newVotes:votes.length,newPositionSnapshots:positions.length,newNewsLeads:newsLeads.length};
 }
 if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1])runImport().then(count=>console.log(JSON.stringify(count))).catch(error=>{console.error(error.message);process.exitCode=1;});
