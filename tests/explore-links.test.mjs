@@ -10,5 +10,5 @@ test("Explore race cards link to the visible comparison ballot view", async () =
 
 test("index requests a versioned Explore script to avoid stale navigation", async () => {
   const html = await readFile(new URL("../index.html", import.meta.url), "utf8");
-  assert.match(html, /src="explore\.js\?v=location-flow-6"/);
+  assert.match(html, /src="explore\.js\?v=location-flow-7"/);
 });
