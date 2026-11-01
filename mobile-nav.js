@@ -1,7 +1,8 @@
 (()=>{
  const nav=document.querySelector('.mobile-nav'),main=document.querySelector('main');if(!nav||!main)return;
+ const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v3')==='true'&&Boolean(localStorage.getItem('represent-me-location-state-v3'))}catch{return false}};
  const pages={
-  ballot:['#election','.notice','#location-tools','#contests','#ballot-mobile-bar'],
+  ballot:['#election','#location-tools','.notice','#contests','#ballot-mobile-bar'],
   explore:['#explore','#vote-plan'],
   issues:['.questionnaire-promo','#beliefs','#value-match'],
   compare:['#representatives','#compare','#contests'],
@@ -11,7 +12,7 @@
  const viewName=Object.fromEntries(Object.entries(pages).map(([k,v])=>[k,k[0].toUpperCase()+k.slice(1)]));
  function setView(view,{push=false,scroll=push}={}){
   const selectors=pages[view];if(!selectors)return;
-  const visible=selectors.map(selector=>main.querySelector(selector)).filter(Boolean);
+  const visible=selectors.filter(selector=>view!=='ballot'||locationReady()||!['.notice','#contests','#ballot-mobile-bar'].includes(selector)).map(selector=>main.querySelector(selector)).filter(Boolean);
   for(const el of units)el.hidden=!visible.includes(el);
   for(const el of visible)main.appendChild(el);
   if(footer)footer.hidden=true;
@@ -24,6 +25,8 @@
  document.addEventListener('click',event=>{const link=event.target.closest('[data-view]');if(!link)return;event.preventDefault();setView(link.dataset.view,{push:true})});
  document.querySelector('.brand')?.addEventListener('click',event=>{if(document.body.dataset.mobileView){event.preventDefault();showHome({push:true})}});
  window.addEventListener('popstate',()=>{const view=new URL(location.href).searchParams.get('view');if(pages[view])setView(view,{scroll:false});else showHome({scroll:false})});
+ window.addEventListener('represent-me-location-ready',()=>{if(document.body.dataset.mobileView==='ballot')setView('ballot',{scroll:false})});
+ window.addEventListener('location-cleared',()=>{if(document.body.dataset.mobileView==='ballot')setView('ballot',{scroll:false})});
  const initial=new URL(location.href).searchParams.get('view');const mainView=!initial||initial==='ballot';
  const scrollPrefix='represent-me-scroll:';
  const saveScroll=()=>{if(mainView)return;try{sessionStorage.setItem(scrollPrefix+location.pathname+location.search,String(window.scrollY))}catch{}};

@@ -7,7 +7,11 @@ test('the first screen asks for location without choosing one for the voter',asy
   await page.evaluate(()=>localStorage.setItem('represent-me-location-ready','true'));
   await page.reload();
   await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
+  await expect(page.locator('#location-tools')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
   await expect(page.getByText('Location not set')).toBeVisible();
+  await expect(page.locator('.notice')).toBeHidden();
+  await expect(page.locator('#contests')).toBeHidden();
   await expect(page.locator('#location-tools')).toBeVisible();
   await expect(page.locator('#ballot-preview-content')).toBeHidden();
   await expect(page.locator('#representatives')).toBeHidden();
@@ -47,8 +51,11 @@ test('a non-Georgia selection never shows the Georgia ballot preview',async({pag
   await page.getByLabel('Address or ZIP code',{exact:true}).fill('43215');
   await page.getByRole('button',{name:/Continue/}).click();
   await expect(page.locator('#ballot-preview-content')).toBeHidden();
-  await expect(page.locator('#explore-results')).toContainText('Ohio');
-  await expect(page.locator('#representative-list')).toContainText('Georgia only');
+  await expect(page.locator('#out-of-state-message')).toBeVisible();
+  await expect(page.locator('#out-of-state-message')).toContainText('Federal races only');
+  await expect(page.locator('#out-of-state-message')).toContainText('State and local ballot details are coming soon');
+  await expect(page.locator('#explore-results')).toContainText('State and local research is coming soon');
+  await expect(page.locator('#representative-list')).toContainText('State and local research is coming soon');
 });
 
 test('privacy information is easy to find',async({page})=>{

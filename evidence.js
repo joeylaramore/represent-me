@@ -136,7 +136,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     if (selectedState !== "GA") {
       representativeRoot.replaceChildren();
       const message = document.createElement("p");
-      message.textContent = selectedState ? "Representative research is currently available for Georgia only." : "Choose your state first to load representatives.";
+      message.textContent = selectedState ? "Federal research is currently available for Georgia only. State and local research is coming soon." : "Choose your state first to load representatives.";
       representativeRoot.appendChild(message);
       return;
     }
