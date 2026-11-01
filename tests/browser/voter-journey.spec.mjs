@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 
 const state=process.env.PLAYWRIGHT_TEST_STATE||'GA';
-const address=process.env.PLAYWRIGHT_TEST_ADDRESS||'30263';
+const address=process.env.PLAYWRIGHT_TEST_ADDRESS||'123 Main Street, Newnan, GA 30263';
 
 test('voter journey: set location, complete the ballot, and report browser errors',async({page},testInfo)=>{
   const errors=[];
@@ -15,7 +15,7 @@ test('voter journey: set location, complete the ballot, and report browser error
 
   await expect(page.locator('#location-tools')).toBeVisible();
   await page.locator('#voting-state').selectOption(state);
-  await page.getByLabel('Address or ZIP code',{exact:true}).fill(address);
+  await page.getByLabel('Street address',{exact:true}).fill(address);
 
   const popupPromise=page.waitForEvent('popup',{timeout:5000}).catch(()=>null);
   await page.getByRole('button',{name:/Continue/}).click();

@@ -18,7 +18,7 @@ test('the first screen asks for location without choosing one for the voter',asy
   await expect(page.locator('.location-links')).toBeHidden();
 });
 
-test('Use my location requests permission and fills state and ZIP',async({context,page})=>{
+test('Use my location requests permission and fills state before street address',async({context,page})=>{
   await context.grantPermissions(['geolocation']);
   await context.setGeolocation({latitude:33.3789,longitude:-84.7997});
   await page.route('https://api.bigdatacloud.net/data/reverse-geocode-client**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({principalSubdivisionCode:'US-GA',postcode:'30263'})}));
@@ -26,9 +26,9 @@ test('Use my location requests permission and fills state and ZIP',async({contex
   await page.getByRole('button',{name:'Use my location'}).click();
   await expect(page.locator('#voting-state')).toHaveValue('GA');
   await expect(page.locator('#voting-address')).toHaveValue('30263');
-  await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
-  await expect(page.locator('#location-title')).toHaveText('Location set: Georgia');
-  await expect(page.locator('#ballot-preview-content')).toBeVisible();
+  await expect(page.locator('#location-label')).toHaveText('Location not set');
+  await expect(page.locator('#location-status')).toContainText('street address');
+  await expect(page.locator('#ballot-preview-content')).toBeHidden();
 });
 
 test('a voter can find official ballot help without reading the research sections',async({page})=>{
@@ -37,10 +37,10 @@ test('a voter can find official ballot help without reading the research section
   await expect(page.locator('#location-tools')).toBeInViewport();
   await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
   await page.locator('#voting-state').selectOption('GA');
-  await expect(page.getByLabel('Address or ZIP code',{exact:true})).toBeVisible();
+  await expect(page.getByLabel('Street address',{exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:/Continue/})).toBeVisible();
   await expect(page.locator('.location-links')).toBeHidden();
-  await page.getByLabel('Address or ZIP code',{exact:true}).fill('123 Main Street, Newnan, GA 30263');
+  await page.getByLabel('Street address',{exact:true}).fill('123 Main Street, Newnan, GA 30263');
   const popupPromise=page.waitForEvent('popup');
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
@@ -63,7 +63,7 @@ test('a voter can open the candidate guide and see loaded races',async({page})=>
 test('a non-Georgia selection never shows the Georgia ballot preview',async({page})=>{
   await openFresh(page);
   await page.locator('#voting-state').selectOption('OH');
-  await page.getByLabel('Address or ZIP code',{exact:true}).fill('43215');
+  await page.getByLabel('Street address',{exact:true}).fill('100 High Street, Columbus, OH 43215');
   await page.getByRole('button',{name:/Continue/}).click();
   await expect(page.locator('#ballot-preview-content')).toBeHidden();
   await expect(page.locator('#out-of-state-message')).toBeVisible();
@@ -83,7 +83,7 @@ test('privacy information is easy to find',async({page})=>{
 test('clearing location removes the visible location state',async({page})=>{
   await openFresh(page);
   await page.locator('#voting-state').selectOption('GA');
-  await page.getByLabel('Address or ZIP code',{exact:true}).fill('30263');
+  await page.getByLabel('Street address',{exact:true}).fill('123 Main Street, Newnan, GA 30263');
   const popupPromise=page.waitForEvent('popup');
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
