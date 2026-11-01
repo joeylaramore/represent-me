@@ -18,6 +18,26 @@
     {
       "label": "Coweta candidate listings (secondary)",
       "url": "https://theballotbrief.com/state/georgia/coweta-county"
+    },
+    {
+      "label": "Georgia 2026 statewide candidate and incumbent guide (WSB-TV)",
+      "url": "https://www.wsbtv.com/news/local/georgia-general-election-2026-candidates-governor-other-statewide-races/YEBLHIEG25FUPNENGKZXZB4QBI/"
+    },
+    {
+      "label": "2026 Georgia federal candidate guide (WABE)",
+      "url": "https://www.wabe.org/2026georgiacandidates"
+    },
+    {
+      "label": "Georgia 2026 voter guide (Atlanta Journal-Constitution)",
+      "url": "https://www.ajc.com/politics/2026/08/georgia-2026-voter-guide/"
+    },
+    {
+      "label": "Coweta County Board of Commissioners members",
+      "url": "https://www.coweta.ga.us/169/Board-of-Commissioners"
+    },
+    {
+      "label": "Georgia House District 70 2026 election and incumbency record (Ballotpedia)",
+      "url": "https://ballotpedia.org/Georgia_House_of_Representatives_District_70"
     }
   ],
   "contests": [
@@ -36,7 +56,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Jon Ossoff",
+      "incumbencySource": 5
     },
     {
       "scope": "Federal",
@@ -53,7 +75,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Brian Jack",
+      "incumbencySource": 5
     },
     {
       "scope": "Statewide",
@@ -70,7 +94,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -87,7 +113,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -104,7 +132,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -121,7 +151,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -138,7 +170,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Tyler Harper",
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -155,7 +189,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "John King",
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -172,7 +208,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Barbara Rivera Holmes",
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -189,7 +227,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Richard Woods",
+      "incumbencySource": 4
     },
     {
       "scope": "Statewide",
@@ -206,7 +246,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Peter Hubbard",
+      "incumbencySource": 6
     },
     {
       "scope": "Statewide",
@@ -223,7 +265,9 @@
       ],
       "source": 2,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 6
     },
     {
       "scope": "District-dependent",
@@ -240,7 +284,9 @@
       ],
       "source": 3,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": null,
+      "incumbencySource": 8
     },
     {
       "scope": "District-dependent",
@@ -257,7 +303,10 @@
       ],
       "source": 3,
       "verification": "reported-roster",
-      "personalBallotConfirmed": false
+      "personalBallotConfirmed": false,
+      "incumbentName": "Bill McKenzie",
+      "incumbencySource": 7
     }
-  ]
+  ],
+  "incumbencyChecked": "2026-11-01"
 }
