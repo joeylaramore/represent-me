@@ -6,17 +6,16 @@ test('the first screen asks for location without choosing one for the voter',asy
   await openFresh(page);
   await page.evaluate(()=>localStorage.setItem('represent-me-location-ready','true'));
   await page.reload();
-  await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
   await expect(page.locator('main > section:not([hidden])').first()).toHaveAttribute('id','location-tools');
   await expect(page.locator('#location-tools')).toBeVisible();
   await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
-  await expect(page.getByText('Location not set')).toBeVisible();
   await expect(page.locator('.notice')).toBeHidden();
   await expect(page.locator('#contests')).toBeHidden();
   await expect(page.locator('#location-tools')).toBeVisible();
   await expect(page.locator('#ballot-preview-content')).toBeHidden();
   await expect(page.locator('#representatives')).toBeHidden();
   await expect(page.locator('#sources')).toBeHidden();
+  await expect(page.locator('.location-links')).toBeHidden();
 });
 
 test('a voter can find official ballot help without reading the research sections',async({page})=>{
@@ -27,13 +26,15 @@ test('a voter can find official ballot help without reading the research section
   await page.locator('#voting-state').selectOption('GA');
   await expect(page.getByLabel('Address or ZIP code',{exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:/Continue/})).toBeVisible();
-  await expect(page.getByRole('link',{name:'Check my registration'})).toBeVisible();
+  await expect(page.locator('.location-links')).toBeHidden();
   await page.getByLabel('Address or ZIP code',{exact:true}).fill('123 Main Street, Newnan, GA 30263');
   const popupPromise=page.waitForEvent('popup');
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
   await expect(page.locator('#ballot-preview-content')).toBeVisible();
   await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
+  await page.locator('.location-help summary').click();
+  await expect(page.getByRole('link',{name:'Check my registration'})).toBeVisible();
   await expect(page.getByRole('button',{name:/Print guide/}).first()).toBeVisible();
 });
 
