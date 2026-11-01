@@ -60,6 +60,20 @@ test('a voter can open the candidate guide and see loaded races',async({page})=>
   await expect(page.locator('#preliminary-ballot')).toContainText('Georgia');
 });
 
+test('candidate info opens without losing a ballot choice',async({page})=>{
+  await openFresh(page);
+  await page.evaluate(()=>{localStorage.setItem('represent-me-location-ready-v3','true');localStorage.setItem('represent-me-location-state-v3','GA')});
+  await page.reload();
+  const firstChoice=page.locator('#preliminary-ballot .ballot-option:not(.ballot-undecided)').first();
+  await firstChoice.click();
+  await page.getByRole('button',{name:/More information about Jon Ossoff/}).click();
+  await expect(page.locator('.candidate-info-dialog')).toBeVisible();
+  await expect(page.locator('.candidate-info-title')).toHaveText('Jon Ossoff');
+  await page.getByRole('button',{name:'Close candidate information'}).click();
+  await expect(page.locator('.candidate-info-dialog')).toBeHidden();
+  await expect(firstChoice.locator('input')).toBeChecked();
+});
+
 test('a non-Georgia selection never shows the Georgia ballot preview',async({page})=>{
   await openFresh(page);
   await page.locator('#voting-state').selectOption('OH');

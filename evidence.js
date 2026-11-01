@@ -129,6 +129,35 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     return records;
   }
 
+  const candidateDialog = document.createElement("dialog");
+  candidateDialog.className = "candidate-info-dialog";
+  candidateDialog.innerHTML = '<form method="dialog"><button class="close" aria-label="Close candidate information">×</button><p class="eyebrow">Candidate information</p><h2 class="candidate-info-title"></h2><div class="candidate-info-body"></div></form>';
+  document.body.appendChild(candidateDialog);
+  const candidateDialogTitle = candidateDialog.querySelector(".candidate-info-title");
+  const candidateDialogBody = candidateDialog.querySelector(".candidate-info-body");
+
+  function openCandidateInfo(button) {
+    const name = button.dataset.candidate || "Candidate";
+    const row = button.closest(".ballot-row");
+    const office = row?.querySelector("h4")?.textContent || "This race";
+    const evidence = claims.find(candidate => candidate.name === name);
+    candidateDialogTitle.textContent = name;
+    candidateDialogBody.replaceChildren();
+    const officeText = document.createElement("p"); officeText.className = "candidate-info-office"; officeText.textContent = office; candidateDialogBody.appendChild(officeText);
+    const summary = document.createElement("div"); summary.className = "candidate-info-summary"; summary.innerHTML = evidence?.claims?.length ? renderClaims(evidence, 2) : '<p class="evidence-empty">A checked summary is not ready yet. Missing information is not a negative finding.</p>'; candidateDialogBody.appendChild(summary);
+    const votes = makeVotePanel(name); const votesHeading = document.createElement("details"); votesHeading.className = "candidate-info-votes"; const votesSummary = document.createElement("summary"); votesSummary.textContent = "Recorded votes"; votesHeading.append(votesSummary, votes); candidateDialogBody.appendChild(votesHeading);
+    const source = row?.querySelector(".ballot-row-actions a"); if (source) { const link = document.createElement("a"); link.className = "candidate-info-source"; link.href = source.href; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Check race source ↗"; candidateDialogBody.appendChild(link); }
+    candidateDialog.showModal();
+  }
+
+  function bindCandidateInfoButtons() {
+    root.querySelectorAll(".candidate-info").forEach(button => {
+      if (button.dataset.bound) return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => openCandidateInfo(button));
+    });
+  }
+
   function renderRepresentativeProfiles() {
     if (!representativeRoot || representativeRoot.dataset.ready === "true") return;
     let selectedState = "";
@@ -211,6 +240,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       panel.appendChild(content);
       row.appendChild(panel);
     });
+    bindCandidateInfoButtons();
   }
 
   renderRepresentativeProfiles();
