@@ -4,6 +4,7 @@
   "scripts": {
     "test": "node --test",
     "test:browser": "playwright test",
+    "test:journey": "playwright test tests/browser/voter-journey.spec.mjs",
     "validate:evidence": "node scripts/validate-evidence.mjs",
     "import:evidence": "node scripts/import-evidence.mjs",
     "validate:imports": "node scripts/validate-import-inbox.mjs"
