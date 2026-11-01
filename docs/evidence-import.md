@@ -39,3 +39,8 @@ A vote can receive a reviewed explanation in the research inbox:
 - `contextSources`: titled HTTPS citations supporting the explanation.
 
 The site groups votes using this reviewed category when present and question-text rules otherwise. Unclear questions go in “Action needs context.” It shows purpose and effect only when both are reviewed; otherwise it says the explanation is pending. The importer preserves reviewed fields as it refreshes official roll-call rows. Do not infer a bill’s effect from a member’s vote or a motion label alone. Amendments are described as amendments, not as final passage of the whole bill.
+
+
+## News coverage fallback for candidates without Congressional roll calls
+
+For ballot candidates with no imported official Congressional vote history, the importer searches Google News RSS for recent coverage from a configured set of established national and Georgia newsrooms, including Reuters, the Associated Press, WABE, the Georgia Recorder, WSB-TV, GPB, and the Atlanta Journal-Constitution. It stores article title, publisher, date, and the Google News link in `newsLeads` in the research inbox. It does not copy article text or infer a candidate position from a headline. The site labels these as coverage leads; a reviewer must read the story and publish a dated, attributed summary in `data/candidate-evidence-2026.json` before it appears as a reviewed position.
