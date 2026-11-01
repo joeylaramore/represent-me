@@ -17,6 +17,7 @@ test('a voter can find official ballot help without reading the research section
   await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
   await expect(page.getByLabel('Address or ZIP code')).toBeVisible();
   await expect(page.getByRole('button',{name:/Continue/})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Check my registration'})).toBeVisible();
 });
 
 test('a voter can open the candidate guide and see loaded races',async({page})=>{
