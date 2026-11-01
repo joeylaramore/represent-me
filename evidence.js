@@ -14,10 +14,12 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     claims = Array.isArray(json.candidates) ? json.candidates : [];
   } catch { claims = []; }
 
-  let votesPromise;
-  const loadVotes = () => votesPromise ||= fetch("data/imported-evidence-2026.json", { cache: "no-store" })
-    .then(response => { if (!response.ok) throw new Error("Vote records unavailable"); return response.json(); })
-    .then(json => Array.isArray(json.votes) ? json.votes : []);
+  let importedEvidencePromise;
+  const loadImportedEvidence = () => importedEvidencePromise ||= fetch("data/imported-evidence-2026.json", { cache: "no-store" })
+    .then(response => { if (!response.ok) throw new Error("Imported evidence unavailable"); return response.json(); });
+  const loadVotes = () => loadImportedEvidence().then(json => Array.isArray(json.votes) ? json.votes : []);
+  const loadNewsLeads = () => loadImportedEvidence().then(json => Array.isArray(json.newsLeads) ? json.newsLeads : []);
+  const loadPositionSources = () => loadImportedEvidence().then(json => Array.isArray(json.positionSources) ? json.positionSources : []);
 
   function renderClaims(candidate, limit = Infinity) {
     const items = Array.isArray(candidate?.claims) ? candidate.claims : [];
@@ -87,7 +89,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       const more = details.querySelector(".vote-more");
       let visibleLimit = 20;
       if (!records.length) {
-        output.innerHTML = '<p class="evidence-empty">No official vote records are loaded for this lawmaker yet. This is not evidence that no votes exist.</p>';
+        output.innerHTML = '<p class="evidence-empty">No official vote records are available for this candidate in the current import. That does not mean they have never voted or taken a position.</p>';
         status.textContent = "No vote records are available in this data set yet.";
         details.dataset.loaded = "true";
         return;
@@ -131,10 +133,58 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
 
   const candidateDialog = document.createElement("dialog");
   candidateDialog.className = "candidate-info-dialog";
-  candidateDialog.innerHTML = '<form method="dialog"><button class="close" aria-label="Close candidate information">×</button><p class="eyebrow">Candidate information</p><h2 class="candidate-info-title"></h2><div class="candidate-info-body"></div></form>';
+  candidateDialog.innerHTML = '<form method="dialog"><button class="close" aria-label="Close candidate information">×</button><p class="eyebrow">Positions and public record</p><h2 class="candidate-info-title"></h2><div class="candidate-info-body"></div></form>';
   document.body.appendChild(candidateDialog);
   const candidateDialogTitle = candidateDialog.querySelector(".candidate-info-title");
   const candidateDialogBody = candidateDialog.querySelector(".candidate-info-body");
+
+  function makeNewsLeadsPanel(candidateName) {
+    const panel = document.createElement("details"); panel.className = "candidate-news-leads";
+    const title = document.createElement("summary"); title.textContent = "News coverage and position leads"; panel.appendChild(title);
+    const note = document.createElement("p"); note.className = "source-note"; note.textContent = "Reports can help locate a candidate's stated views. These are research leads, not reviewed position summaries; open the article and check its context."; panel.appendChild(note);
+    const status = document.createElement("p"); status.className = "vote-status"; status.setAttribute("role", "status"); panel.appendChild(status);
+    const output = document.createElement("div"); output.className = "candidate-news-lead-list"; panel.appendChild(output);
+    panel.addEventListener("toggle", async () => {
+      if (!panel.open || panel.dataset.loaded) return;
+      status.textContent = "Loading coverage leads…";
+      try {
+        const all = await loadNewsLeads();
+        const rows = all.filter(lead => lead.candidate === candidateName && lead.status === "news-report-needs-human-review").sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+        output.innerHTML = rows.length ? rows.slice(0, 12).map(lead => {
+          const url = /^https:\/\//.test(lead.url || "") ? lead.url : "";
+          if (!url || !lead.title || !lead.publisher) return "";
+          return '<article class="candidate-news-lead"><p><strong>' + escapeHtml(lead.publisher) + '</strong>' + (lead.date ? ' · ' + escapeHtml(lead.date) : '') + '</p><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(lead.title) + ' ↗</a></article>';
+        }).join("") : '<p class="evidence-empty">No coverage leads from the configured reputable news sources are in the import inbox. Missing coverage is not evidence that the candidate has no position.</p>';
+        status.textContent = rows.length ? "Showing " + Math.min(rows.length, 12) + " coverage leads. Review the article before treating it as a candidate position." : "";
+        panel.dataset.loaded = "true";
+      } catch { status.textContent = "News coverage leads could not be loaded. Please try again later."; }
+    });
+    return panel;
+  }
+
+  function makePositionSourcesPanel(candidateName) {
+    const panel = document.createElement("details"); panel.className = "candidate-position-sources";
+    const title = document.createElement("summary"); title.textContent = "Candidate and campaign source pages"; panel.appendChild(title);
+    const note = document.createElement("p"); note.className = "source-note"; note.textContent = "These are first-party source snapshots. The linked pages can contain the candidate's own stated positions; the snapshot is not itself a reviewed summary."; panel.appendChild(note);
+    const status = document.createElement("p"); status.className = "vote-status"; status.setAttribute("role", "status"); panel.appendChild(status);
+    const output = document.createElement("div"); output.className = "candidate-position-source-list"; panel.appendChild(output);
+    panel.addEventListener("toggle", async () => {
+      if (!panel.open || panel.dataset.loaded) return;
+      status.textContent = "Loading candidate source pages…";
+      try {
+        const all = await loadPositionSources();
+        const rows = all.filter(item => item.candidate === candidateName).sort((a, b) => String(b.changedAt || "").localeCompare(String(a.changedAt || "")));
+        output.innerHTML = rows.length ? rows.map(item => {
+          const url = /^https:\/\//.test(item.url || "") ? item.url : "";
+          if (!url || !item.title) return "";
+          return '<article class="candidate-news-lead"><p><strong>' + escapeHtml(new URL(url).hostname.replace(/^www\./, "")) + '</strong>' + (item.changedAt ? ' · checked ' + escapeHtml(String(item.changedAt).slice(0, 10)) : '') + '</p><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.title) + ' ↗</a>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') + '</article>';
+        }).join("") : '<p class="evidence-empty">No first-party candidate source page is in the current import.</p>';
+        status.textContent = rows.length ? rows.length + " first-party source snapshot(s). Review the page before treating it as a position." : "";
+        panel.dataset.loaded = "true";
+      } catch { status.textContent = "Candidate source snapshots could not be loaded. Please try again later."; }
+    });
+    return panel;
+  }
 
   function openCandidateInfo(button) {
     const name = button.dataset.candidate || "Candidate";
@@ -144,9 +194,25 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
     candidateDialogTitle.textContent = name;
     candidateDialogBody.replaceChildren();
     const officeText = document.createElement("p"); officeText.className = "candidate-info-office"; officeText.textContent = office; candidateDialogBody.appendChild(officeText);
-    const summary = document.createElement("div"); summary.className = "candidate-info-summary"; summary.innerHTML = evidence?.claims?.length ? renderClaims(evidence, 2) : '<p class="evidence-empty">A checked summary is not ready yet. Missing information is not a negative finding.</p>'; candidateDialogBody.appendChild(summary);
-    const votes = makeVotePanel(name); const votesHeading = document.createElement("details"); votesHeading.className = "candidate-info-votes"; const votesSummary = document.createElement("summary"); votesSummary.textContent = "Recorded votes"; votesHeading.append(votesSummary, votes); candidateDialogBody.appendChild(votesHeading);
-    const source = row?.querySelector(".ballot-row-actions a"); if (source) { const link = document.createElement("a"); link.className = "candidate-info-source"; link.href = source.href; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Check race source ↗"; candidateDialogBody.appendChild(link); }
+    const statusLine = document.createElement("p"); statusLine.className = "candidate-info-incumbency";
+    statusLine.textContent = button.dataset.incumbent === "true" ? "Incumbent in this race" : (button.dataset.incumbentName ? "Challenger; not the current officeholder" : "Not incumbent; this is an open seat");
+    candidateDialogBody.appendChild(statusLine);
+    if (button.dataset.incumbencySource) {
+      const statusSource = document.createElement("a"); statusSource.className = "candidate-info-status-source";
+      statusSource.href = button.dataset.incumbencySource; statusSource.target = "_blank"; statusSource.rel = "noopener noreferrer";
+      statusSource.textContent = "Source for incumbent status ↗"; candidateDialogBody.appendChild(statusSource);
+    }
+    const positionHeading = document.createElement("h3"); positionHeading.className = "candidate-info-section-title"; positionHeading.textContent = "Published, reviewed positions and statements"; candidateDialogBody.appendChild(positionHeading);
+    const summary = document.createElement("div"); summary.className = "candidate-info-summary";
+    summary.innerHTML = evidence?.claims?.length ? renderClaims(evidence) : '<p class="evidence-empty">No reviewed position summary is published yet. Check the source pages or news leads below; missing information is not a negative finding.</p>';
+    candidateDialogBody.appendChild(summary);
+    candidateDialogBody.appendChild(makePositionSourcesPanel(name));
+    candidateDialogBody.appendChild(makeNewsLeadsPanel(name));
+    const votes = makeVotePanel(name); const votesHeading = document.createElement("details"); votesHeading.className = "candidate-info-votes";
+    votesHeading.addEventListener("toggle", () => { if (votesHeading.open) votes.open = true; });
+    const votesSummary = document.createElement("summary"); votesSummary.textContent = "Official voting history"; votesHeading.append(votesSummary, votes); candidateDialogBody.appendChild(votesHeading);
+    const source = row?.querySelector(".ballot-row-actions a");
+    if (source) { const link = document.createElement("a"); link.className = "candidate-info-source"; link.href = source.href; link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Check race source ↗"; candidateDialogBody.appendChild(link); }
     candidateDialog.showModal();
   }
 
@@ -180,6 +246,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       const card = document.createElement("article"); card.className = "representative-card";
       const office = document.createElement("p"); office.className = "representative-office"; office.textContent = profile.office;
       const name = document.createElement("h3"); name.textContent = profile.name;
+      const incumbentTag = document.createElement("span"); incumbentTag.className = "candidate-incumbency representative-incumbency"; incumbentTag.textContent = "Incumbent";
       if (profile.birthDate) {
         const age = document.createElement("p"); age.className = "representative-age";
         const birth = new Date(profile.birthDate + "T00:00:00"); const today = new Date();
@@ -199,7 +266,7 @@ import { filterVoteRecords, groupVoteRecords, classifyVoteRecord, summarizeProce
       claimsDetails.appendChild(claimsSummary);
       const content = document.createElement("div"); content.innerHTML = evidence?.claims?.length ? renderClaims(evidence, 2) : renderClaims(null);
       claimsDetails.appendChild(content); more.appendChild(claimsDetails);
-      card.append(office, name, intro, link, more); representativeRoot.appendChild(card);
+      card.append(office, name, incumbentTag, intro, link, more); representativeRoot.appendChild(card);
     }
     representativeRoot.dataset.ready = "true";
   }
