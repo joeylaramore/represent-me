@@ -33116,13 +33116,23 @@
       "status": "first-party-source-needs-human-review"
     },
     {
+      "candidate": "Jon Ossoff",
+      "office": "U.S. Senate",
+      "title": "About Jon - Jon Ossoff for U.S. Senate",
+      "description": "Senator Jon Ossoff is MAGA’s #1 target in 2026. Donate now to his re-election campaign and help him fight back.",
+      "url": "https://electjon.com/bio/",
+      "contentSha256": "e66cc0420ffd87bee46f38b65b41fbbcbf9f2b97b98a8df501260a726bb76160",
+      "changedAt": "2026-10-22T17:54:06.307Z",
+      "status": "first-party-source-needs-human-review"
+    },
+    {
       "candidate": "Mike Collins",
       "office": "U.S. Senate",
       "title": "Issues &#8211; Mike Collins for Senate",
       "description": "Join the ride!",
       "url": "https://mikecollinsga.com/",
-      "contentSha256": "091592dbbd681c5417dde5084da3701ad780854ab85b1ebfa72a8bdf6c57d95f",
-      "changedAt": "2026-10-09T01:56:07.018Z",
+      "contentSha256": "1f273007bcec893c0148e1072d4ce9de2307348397bd0e8db673b90ac2ad989c",
+      "changedAt": "2026-10-22T17:54:06.514Z",
       "status": "first-party-source-needs-human-review"
     }
   ]
