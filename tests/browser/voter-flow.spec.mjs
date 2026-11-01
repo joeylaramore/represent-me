@@ -28,6 +28,7 @@ test('a voter can find official ballot help without reading the research section
   await page.getByRole('button',{name:/Continue/}).click();
   const popup=await popupPromise;await popup.close();
   await expect(page.locator('#ballot-preview-content')).toBeVisible();
+  await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
   await expect(page.getByRole('button',{name:/Print guide/}).first()).toBeVisible();
 });
 
@@ -55,6 +56,19 @@ test('privacy information is easy to find',async({page})=>{
   await page.getByRole('button',{name:'Privacy'}).click();
   await expect(page.locator('#privacy-dialog')).toBeVisible();
   await expect(page.locator('#privacy-dialog')).toContainText('not saved or sent');
+});
+
+test('clearing location removes the visible location state',async({page})=>{
+  await openFresh(page);
+  await page.locator('#voting-state').selectOption('GA');
+  await page.getByLabel('Address or ZIP code',{exact:true}).fill('30263');
+  const popupPromise=page.waitForEvent('popup');
+  await page.getByRole('button',{name:/Continue/}).click();
+  const popup=await popupPromise;await popup.close();
+  await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
+  await page.getByRole('button',{name:'Clear',exact:true}).click();
+  await expect(page.locator('#location-label')).toHaveText('Location not set');
+  await expect(page.locator('#ballot-preview-content')).toBeHidden();
 });
 
 test('keyboard users can reach the main actions',async({page})=>{

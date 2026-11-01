@@ -9,7 +9,7 @@
  const mobileCount=document.getElementById('mobile-ballot-count');
  const preview=document.getElementById('ballot-preview-content');const locationLabel=document.getElementById('location-label');
  const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v3')==='true'&&localStorage.getItem('represent-me-location-state-v3')==='GA'}catch{return false}};
- const enablePreview=()=>{if(!locationReady())return;preview.hidden=false;document.getElementById('ballot-mobile-bar').hidden=false;if(locationLabel)locationLabel.textContent='Georgia selected'};
+ const enablePreview=()=>{if(!locationReady())return;preview.hidden=false;document.getElementById('ballot-mobile-bar').hidden=false;if(locationLabel)locationLabel.textContent='Location set: Georgia'};
  const disablePreview=()=>{preview.hidden=true;document.getElementById('ballot-mobile-bar').hidden=true;if(locationLabel)locationLabel.textContent='Location not set'};
  window.addEventListener('represent-me-location-ready',enablePreview);if(locationReady())enablePreview();
  window.addEventListener('location-cleared',disablePreview);
