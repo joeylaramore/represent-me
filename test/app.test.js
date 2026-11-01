@@ -4,13 +4,13 @@ test('candidate names are not fabricated',()=>assert.doesNotMatch(html,/Candidat
 test('verification and official sources are visible',()=>{assert.match(html,/awaiting verification/i);assert.match(html,/Georgia Secretary of State/)})
 test('questionnaire persists locally',()=>assert.match(fs.readFileSync('app.js','utf8'),/localStorage/))
 
-test('questionnaire entry copy matches six current-issue questions',()=>assert.match(html,/Take the 6-question questionnaire/))
+test('questionnaire entry copy matches six questions',()=>assert.match(html,/Take 6 questions/))
 
 test('published image includes the evidence module dependency',()=>{assert.ok(fs.readFileSync('Dockerfile','utf8').includes('evidence.js vote-records.mjs'));assert.ok(html.includes('type="module" src="evidence.js?v='))});
-test('compare page uses clear progressive candidate instructions',()=>{assert.ok(html.includes('open <strong>Candidate details</strong>'));assert.ok(html.includes('plain-language explanation and its sources'));assert.ok(html.includes('Recorded votes'))});
+test('compare page uses clear progressive candidate instructions',()=>{assert.ok(html.includes('<strong>Candidate details</strong>'));assert.ok(html.includes('short summary'));assert.ok(html.includes('Recorded votes'))});
 test('every static in-page link has a matching target',()=>{for(const [,target] of html.matchAll(/href="#([^"]+)"/g)){assert.ok(html.includes('id="'+target+'"')||html.includes("id='"+target+"'"),'Missing in-page target: #'+target)}});
 test('nginx serves the ES module helper with a JavaScript MIME type',()=>{assert.ok(fs.readFileSync('nginx.conf','utf8').includes('location ~ \\.mjs$ { default_type application/javascript; try_files $uri =404; }'))});
 
 test('candidate claims start as previews and reveal context and citations on demand',()=>{const evidence=fs.readFileSync('evidence.js','utf8');assert.ok(evidence.includes('<details class="evidence-claim"><summary>'));assert.ok(evidence.includes('Open explanation and sources'));assert.ok(evidence.includes('<p class="evidence-summary">'));assert.ok(evidence.includes('Sources and cross-checks ('))});
 
-test('representative summaries use plain language and say what is still missing',()=>{const evidence=fs.readFileSync('evidence.js','utf8');assert.match(html,/Federal representatives/);assert.ok(evidence.includes('publicly supported a $35 monthly cap'));assert.ok(evidence.includes('checked summary is not ready yet'));});
+test('representative summaries use plain language and say what is still missing',()=>{const evidence=fs.readFileSync('evidence.js','utf8');assert.match(html,/Your representatives/);assert.ok(evidence.includes('publicly supported a $35 monthly cap'));assert.ok(evidence.includes('checked summary is not ready yet'));});
