@@ -7,6 +7,7 @@ const targetsPath=new URL('data/import-targets.json',root);
 const inboxPath=new URL('data/imported-evidence-2026.json',root);
 const apiRoot='https://api.congress.gov/v3';
 const senateRoot='https://www.senate.gov/legislative/LIS/roll_call_lists';
+const senateMirrorRoot='https://raw.githubusercontent.com/Votega/ga-federal-legislators/main/sessions';
 const headers={'user-agent':'RepresentMe evidence import/1.0 (+https://representme.jlaramore.com/)','referer':'https://www.senate.gov/legislative/votes_new.htm','accept':'application/json,text/xml,text/html'};
 
 function textOf(xml,tag){const match=xml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i'));return match?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1').replace(/<[^>]+>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim()||''}
@@ -32,6 +33,14 @@ function extractHouseVotes(payload){
  return (Array.isArray(votes)?votes:[votes]).filter(Boolean);
 }
 function extractSenateVoteNumbers(xml){return [...new Set([...xml.matchAll(/<vote_number>(\d+)<\/vote_number>/gi)].map(m=>Number(m[1])))].filter(Number.isFinite)}
+function ordinal(n){const mod100=n%100;const suffix=mod100>=11&&mod100<=13?'th':({1:'st',2:'nd',3:'rd'}[n%10]||'th');return `${n}${suffix}`}
+function parseSenateMirrorVotes(payload,targets,existing,congress,session){
+ const old=new Set(existing.map(v=>v.id));const rows=[];const voteMap=payload?.votes||{};const memberVotes=payload?.memberVotes||{};
+ for(const target of targets.filter(c=>c.chamber==='senate'&&c.bioguideId)){
+  for(const memberVote of memberVotes[target.bioguideId]||[]){const match=String(memberVote.voteId||'').match(/^S(\d+)_(\d+)_(\d+)$/);if(!match||Number(match[1])!==congress||Number(match[2])!==session)continue;const number=Number(match[3]);const id=`senate-${congress}-${session}-${String(number).padStart(5,'0')}`;if(old.has(`${id}-${target.name}`))continue;const vote=voteMap[memberVote.voteId];if(!vote)continue;const sourceUrl=`https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(number).padStart(5,'0')}.xml`;rows.push({id:`${id}-${target.name}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:target.bioguideId,chamber:'senate',date:vote.date||'',question:vote.motionText||vote.title||'',result:vote.resultText||vote.result||'',vote:memberVote.vote||'',billUrl:vote.billUrl||'',sourceUrl,status:'official-record-needs-context-review',retrievedVia:'VoteGA mirror of official Senate roll-call XML'});}
+ }
+ return rows;
+}
 function mergeRows(existing,incoming,key){const map=new Map(existing.map(x=>[key(x),x]));for(const row of incoming)map.set(key(row),row);return [...map.values()].sort((a,b)=>key(a).localeCompare(key(b)))}
 function mergeVoteRows(existing,incoming){
  const map=new Map(existing.map(row=>[row.id,row]));
@@ -76,7 +85,7 @@ async function fetchHouseVotes(targets,existing,key,congress,session){
  return {rows:newRows,diagnostics};
 }
 async function fetchSenateVotes(targets,existing,congress,session){
- const senators=targets.filter(c=>c.chamber==='senate'&&c.senateName);const old=new Set(existing.map(v=>v.id));const indexUrl=`${senateRoot}/vote_menu_${congress}_${session}.xml`;let xml;try{xml=await fetchText(indexUrl)}catch(error){console.warn(`Skipping Senate ${congress}/${session} refresh; the official Senate roll-call index was unavailable: ${error.message}`);return []}
+ const senators=targets.filter(c=>c.chamber==='senate'&&c.senateName);const old=new Set(existing.map(v=>v.id));const indexUrl=`${senateRoot}/vote_menu_${congress}_${session}.xml`;let xml;try{xml=await fetchText(indexUrl)}catch(error){console.warn(`Official Senate ${congress}/${session} feed unavailable: ${error.message}`);try{const mirror=await fetchJson(`${senateMirrorRoot}/${ordinal(congress)}/votes.json`);const fallback=parseSenateMirrorVotes(mirror,targets,existing,congress,session);console.warn(`Loaded ${fallback.length} Senate ${congress}/${session} rows from the VoteGA mirror of official Senate XML.`);return fallback}catch(mirrorError){console.warn(`Senate mirror unavailable for ${congress}/${session}: ${mirrorError.message}`);return []}}
  const unique=extractSenateVoteNumbers(xml);const result=[];
  for(const number of unique){const id=`senate-${congress}-${session}-${String(number).padStart(5,'0')}`;if(senators.every(c=>old.has(`${id}-${c.name}`)))continue;const url=`https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(number).padStart(5,'0')}.xml`;let vote;try{vote=parseSenateVoteXml(await fetchText(url),{congress,session,number,url});}catch(error){console.warn(`Skipping unavailable Senate roll call ${url}: ${error.message}`);continue;}for(const target of senators){const member=vote.members.find(m=>m.lastName.toLowerCase()===target.senateName.toLowerCase()&&m.state===target.state);if(member)result.push({id:`${vote.id}-${target.name}`,candidate:target.name,office:target.office,memberOffice:target.memberOffice,memberId:`${target.senateName}-${target.state}`,chamber:'senate',date:vote.date,question:vote.question,result:vote.result,vote:member.vote,sourceUrl:url,status:'official-record-needs-context-review'});}}
  return result;
@@ -86,7 +95,7 @@ async function fetchPositions(targets,existing){
  for(const candidate of targets)for(const url of candidate.positionSources||[]){const fetched=await fetchFirstPartyResponse(url);if(fetched.redirected){console.warn(`Skipping position source redirect outside its first-party host for ${candidate.name}: ${new URL(url).hostname} -> ${fetched.targetHost}`);continue;}const html=await fetched.response.text();const metadata=extractPositionMetadata(html,url);const prior=old.get(candidate.name+'|'+metadata.url);if(prior?.contentSha256===metadata.contentSha256)continue;rows.push({candidate:candidate.name,office:candidate.office,...metadata,changedAt:new Date().toISOString(),status:'first-party-source-needs-human-review'});}
  return rows;
 }
-export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress,fetchSenateVotes};
+export {textOf,parseSenateVoteXml,extractPositionMetadata,extractHouseEntries,extractHouseVotes,extractSenateVoteNumbers,mergeRows,mergeVoteRows,currentCongress,fetchSenateVotes,parseSenateMirrorVotes};
 export async function runImport({targetsPathArg=targetsPath,inboxPathArg=inboxPath,apiKey=process.env.CONGRESS_API_KEY,now=new Date()}={}){
  if(!apiKey)throw new Error('Set CONGRESS_API_KEY to use the official Congress.gov House vote API.');
  const targets=JSON.parse(await fs.readFile(targetsPathArg,'utf8'));const inbox=JSON.parse(await fs.readFile(inboxPathArg,'utf8'));const {congress,session}=currentCongress(now);const votes=[];
