@@ -36,7 +36,8 @@ jobs:
           const targets=JSON.parse(fs.readFileSync('data/import-targets.json','utf8'));
           const inbox=JSON.parse(fs.readFileSync('data/imported-evidence-2026.json','utf8'));
           const votes=inbox.votes||[];
-          const lines=['## Daily evidence import audit',`Target candidates: ${targets.candidates.length}`,`Stored votes: ${votes.length}`,`House votes: ${votes.filter(v=>v.chamber==='house').length}`,`Senate votes: ${votes.filter(v=>v.chamber==='senate').length}`,`Position snapshots: ${(inbox.positionSources||[]).length}`,...targets.candidates.map(c=>`${c.name}: ${votes.filter(v=>v.candidate===c.name).length} votes`)];
+          const leads=inbox.newsLeads||[];
+          const lines=['## Daily evidence import audit',`Target candidates: ${targets.candidates.length}`,`Stored votes: ${votes.length}`,`House votes: ${votes.filter(v=>v.chamber==='house').length}`,`Senate votes: ${votes.filter(v=>v.chamber==='senate').length}`,`Position snapshots: ${(inbox.positionSources||[]).length}`,`News coverage leads: ${leads.length}`,...targets.candidates.map(c=>`${c.name}: ${votes.filter(v=>v.candidate===c.name).length} votes`),...Array.from(new Set(leads.map(l=>l.candidate)),name=>`${name}: ${leads.filter(l=>l.candidate===name).length} news leads`)];
           console.log(lines.join('\n'));
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n\n')+'\n');
           if(votes.length===0){console.error('No candidate-specific votes stored despite configured targets. Check House member API parsing and candidate identifiers.');process.exitCode=1;}
