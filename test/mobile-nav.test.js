@@ -10,7 +10,7 @@ test('main route starts at the top while research routes keep scroll state',()=>
 
 test('refresh saves and restores scroll after page layout settles',()=>{assert.match(js,/sessionStorage\.setItem\(scrollPrefix\+location\.pathname\+location\.search/);assert.match(js,/history\.scrollRestoration='manual'/);assert.match(js,/window\.addEventListener\('load',restore/);assert.match(js,/performance\.now\(\)-started<1800/)});
 
-test('mobile navigation and readable styles use fresh browser cache versions',()=>{assert.match(html,/styles\.css\?v=representative-flow-2/);assert.match(html,/mobile-nav\.js\?v=representative-flow-4/)});
+test('mobile navigation and readable styles use fresh browser cache versions',()=>{assert.match(html,/styles\.css\?v=official-ballot-1/);assert.match(html,/mobile-nav\.js\?v=representative-flow-4/)});
 test('scroll position is saved while the reader moves and restored after load',()=>{assert.match(js,/window\.addEventListener\('scroll',saveScroll/);assert.match(js,/sessionStorage\.setItem\(scrollPrefix\+location\.pathname\+location\.search,String\(window\.scrollY\)\)/);assert.match(js,/performance\.now\(\)-started<1800/)});
 
 test('candidate evidence previews and controls are easy to read on mobile',()=>{assert.match(css,/.evidence-preview\{font-size:18px/);assert.match(css,/.evidence-expand-hint\{font-size:17px/);assert.match(css,/.evidence-detail\{font-size:18px/);assert.match(css,/.official-votes>summary\{font-size:19px/)});
