@@ -8,7 +8,7 @@
  const progressTotal=document.getElementById('ballot-progress-total');
  const mobileCount=document.getElementById('mobile-ballot-count');
  const preview=document.getElementById('ballot-preview-content');const locationLabel=document.getElementById('location-label');
- const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready')==='true'}catch{return false}};
+ const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v2')==='true'}catch{return false}};
  const enablePreview=()=>{preview.hidden=false;document.getElementById('ballot-mobile-bar').hidden=false;if(locationLabel)locationLabel.textContent='Location set'};
  window.addEventListener('represent-me-location-ready',enablePreview);if(locationReady())enablePreview();
  const updateStatus=()=>{const count=selections.size;status.textContent='Choices are temporary and never saved.';progress.textContent=count+' race'+(count===1?'':'s')+' selected';mobileCount.textContent=count+' selected'};

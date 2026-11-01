@@ -2,7 +2,7 @@
 (()=>{
  const form=document.getElementById('location-form');const address=document.getElementById('voting-address');const status=document.getElementById('location-status');const useLocation=document.getElementById('use-location');
  const officialUrl='https://mvp.sos.ga.gov/';
- const markLocationReady=()=>{try{localStorage.setItem('represent-me-location-ready','true')}catch{};window.dispatchEvent(new Event('represent-me-location-ready'))};
+ const markLocationReady=()=>{try{localStorage.setItem('represent-me-location-ready-v2','true')}catch{};window.dispatchEvent(new Event('represent-me-location-ready'))};
  const openOfficial=message=>{markLocationReady();status.textContent=message;window.open(officialUrl,'_blank','noopener,noreferrer')};
  form.addEventListener('submit',e=>{e.preventDefault();const value=address.value.trim();if(!value){status.textContent='Enter an address or ZIP code, or use your location.';address.focus();return}openOfficial('Opening Georgia’s official ballot lookup. Your address stays on this page and was not saved.');});
  useLocation.addEventListener('click',()=>{if(!navigator.geolocation){status.textContent='Location sharing is not available. Enter your address or ZIP code.';address.focus();return}status.textContent='Requesting your location…';navigator.geolocation.getCurrentPosition(()=>{markLocationReady();status.textContent='Location found. Confirm your address on Georgia’s official site.';window.location.assign(officialUrl)},()=>{status.textContent='Location was not shared. Enter your address or ZIP code instead.';address.focus()},{enableHighAccuracy:false,maximumAge:300000,timeout:8000})});

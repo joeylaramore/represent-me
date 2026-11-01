@@ -4,6 +4,8 @@ const openFresh=async page=>{await page.goto('/');await page.evaluate(()=>localS
 
 test('the first screen asks for location without choosing one for the voter',async({page})=>{
   await openFresh(page);
+  await page.evaluate(()=>localStorage.setItem('represent-me-location-ready','true'));
+  await page.reload();
   await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
   await expect(page.getByText('Location not set')).toBeVisible();
   await expect(page.locator('#location-tools')).toBeVisible();
@@ -30,7 +32,7 @@ test('a voter can find official ballot help without reading the research section
 
 test('a voter can open the candidate guide and see loaded races',async({page})=>{
   await openFresh(page);
-  await page.evaluate(()=>localStorage.setItem('represent-me-location-ready','true'));
+  await page.evaluate(()=>localStorage.setItem('represent-me-location-ready-v2','true'));
   await page.reload();
   await expect(page.locator('#contests')).toBeVisible();
   await expect(page.locator('#preliminary-ballot')).not.toContainText('Loading candidate roster');
