@@ -2,7 +2,7 @@
  const nav=document.querySelector('.mobile-nav'),main=document.querySelector('main');if(!nav||!main)return;
  const locationReady=()=>{try{return localStorage.getItem('represent-me-location-ready-v3')==='true'&&Boolean(localStorage.getItem('represent-me-location-state-v3'))}catch{return false}};
  const pages={
-  ballot:['#election','#location-tools','.notice','#contests','#ballot-mobile-bar'],
+  ballot:['#location-tools','#election','.notice','#contests','#ballot-mobile-bar'],
   explore:['#explore','#vote-plan'],
   issues:['.questionnaire-promo','#beliefs','#value-match'],
   compare:['#representatives','#compare','#contests'],

@@ -7,6 +7,7 @@ test('the first screen asks for location without choosing one for the voter',asy
   await page.evaluate(()=>localStorage.setItem('represent-me-location-ready','true'));
   await page.reload();
   await expect(page.getByRole('heading',{name:'Your ballot'})).toBeVisible();
+  await expect(page.locator('main > section:not([hidden])').first()).toHaveAttribute('id','location-tools');
   await expect(page.locator('#location-tools')).toBeVisible();
   await expect(page.getByRole('button',{name:'Use my location'})).toBeVisible();
   await expect(page.getByText('Location not set')).toBeVisible();
