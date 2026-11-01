@@ -18,6 +18,18 @@ test('the first screen asks for location without choosing one for the voter',asy
   await expect(page.locator('.location-links')).toBeHidden();
 });
 
+test('Use my location requests permission and fills state and ZIP',async({context,page})=>{
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({latitude:33.3789,longitude:-84.7997});
+  await page.route('https://api.bigdatacloud.net/data/reverse-geocode-client**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({principalSubdivisionCode:'US-GA',postcode:'30263'})}));
+  await openFresh(page);
+  await page.getByRole('button',{name:'Use my location'}).click();
+  await expect(page.locator('#voting-state')).toHaveValue('GA');
+  await expect(page.locator('#voting-address')).toHaveValue('30263');
+  await expect(page.locator('#location-label')).toContainText('Location set: Georgia');
+  await expect(page.locator('#ballot-preview-content')).toBeVisible();
+});
+
 test('a voter can find official ballot help without reading the research sections',async({page})=>{
   await openFresh(page);
   await page.locator('#location-tools').scrollIntoViewIfNeeded();
