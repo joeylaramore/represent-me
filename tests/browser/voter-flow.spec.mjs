@@ -6,8 +6,11 @@ test('the first screen gives a voter three clear choices',async({page})=>{
   const start=page.locator('.quick-start-card');
   await expect(start).toHaveCount(3);
   await expect(start.nth(0)).toContainText('Find my ballot');
-  await expect(start.nth(1)).toContainText('Compare candidates');
-  await expect(start.nth(2)).toContainText('See sources');
+  await expect(start.nth(1)).toContainText('Print my guide');
+  await expect(start.nth(2)).toContainText('More research');
+  await expect(page.locator('#contests')).toBeVisible();
+  await expect(page.locator('#representatives')).toBeHidden();
+  await expect(page.locator('#sources')).toBeHidden();
 });
 
 test('a voter can find official ballot help without reading the research sections',async({page})=>{

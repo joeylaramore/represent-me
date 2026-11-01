@@ -1,7 +1,7 @@
 (()=>{
  const nav=document.querySelector('.mobile-nav'),main=document.querySelector('main');if(!nav||!main)return;
  const pages={
-  ballot:['#election','#representatives','.notice','#explore','#compare','#contests','#location-tools','#vote-plan','#ballot-mobile-bar'],
+  ballot:['#election','.notice','#location-tools','#contests','#ballot-mobile-bar'],
   explore:['#explore','#vote-plan'],
   issues:['.questionnaire-promo','#beliefs','#value-match'],
   compare:['#representatives','#compare','#contests'],
@@ -20,7 +20,7 @@
   if(push){const url=new URL(location.href);url.searchParams.set('view',view);history.pushState({view},'',url)}
   if(scroll)window.scrollTo({top:0,behavior:'instant'});
  }
- function showHome({push=false,scroll=push}={}){for(const el of originalOrder){main.appendChild(el);el.hidden=false}if(footer)footer.hidden=false;nav.querySelectorAll('[data-view]').forEach(l=>l.removeAttribute('aria-current'));delete document.body.dataset.mobileView;document.title='Represent Me | My Election';if(push){history.pushState({},'',location.pathname)}if(scroll)window.scrollTo({top:0,behavior:'instant'})}
+ function showHome({push=false,scroll=push}={}){setView('ballot',{push:false,scroll:false});if(push){history.pushState({},'',location.pathname)}if(scroll)window.scrollTo({top:0,behavior:'instant'})}
  document.addEventListener('click',event=>{const link=event.target.closest('[data-view]');if(!link)return;event.preventDefault();setView(link.dataset.view,{push:true})});
  document.querySelector('.brand')?.addEventListener('click',event=>{if(document.body.dataset.mobileView){event.preventDefault();showHome({push:true})}});
  window.addEventListener('popstate',()=>{const view=new URL(location.href).searchParams.get('view');if(pages[view])setView(view,{scroll:false});else showHome({scroll:false})});
@@ -38,6 +38,7 @@
  const initial=new URL(location.href).searchParams.get('view');
  const savedScroll=sessionStorage.getItem(scrollPrefix+location.pathname+location.search);
  if(pages[initial])setView(initial,{scroll:false});
+ else setView('ballot',{scroll:false});
  if(savedScroll!==null&&Number.isFinite(Number(savedScroll))){
   history.scrollRestoration='manual';
   const restore=()=>restoreSavedScroll(Number(savedScroll));
